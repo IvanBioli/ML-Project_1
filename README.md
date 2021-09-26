@@ -7,10 +7,11 @@ What's this project all about.
 
 ## File structure
 
-ML_project1
-│   README.md
-│   implementations.py      (Contains all the functions)
-│   run.py                  (To be executed to get the results)
+```
+ML_project1 
+│   README.md 
+│   implementations.py      (Contains all the functions) 
+│   run.py                  (To be executed to get the results) 
 │   proj1_helpers.py        (Helping functions)
 │
 └───data
@@ -21,7 +22,7 @@ ML_project1
 └───report
     │   file021.txt
     │   file022.txt
-
+```
 
 ## TODO list
 
