@@ -1,4 +1,4 @@
-# Useful starting lines
+#%% Useful starting lines
 import numpy as np
 import matplotlib.pyplot as plt
 
