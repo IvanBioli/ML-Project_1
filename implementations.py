@@ -56,3 +56,43 @@ def least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1):
     loss = (y - tX @ w).T @ (y - tX @ w) / (2 * len(y))
 
     return w, loss
+
+def least_squares(y, tX):
+    """
+    Exact analytical solution for the weights using the normal equation.
+
+    Parameters
+    ----------
+    y : np.ndarray
+        Vector with the labels.
+    tX : np.ndarray
+        Array with the samples as rows and the features as columns.
+
+    Returns
+    -------
+    w : np.ndarray
+        Vector containing the final weights.
+    loss : float
+        Mean squared error loss function evaluated with the final weights.
+
+    References
+    ----------
+    [2] M. Jaggi, and M. E. Khan, "Least Squares", Machine Learning (CS-433),
+        p. 7, September XX, 2021.
+
+    Usage
+    -----
+    >>> y, tX, _ = load_csv_data([TRAINING_DATA_PATH])
+    >>> w, loss = least_squares(y, tX)
+
+    """
+
+    # Computing the exact analytical weights using the formula provided in [2]
+    w = np.linalg.inv(tX.T @ tX) @ tX.T @ y
+
+    # Computing loss for the final weights
+    loss = (y - tX @ w).T @ (y - tX @ w) / (2 * len(y))
+
+    return w, loss
+
+# %%

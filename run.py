@@ -1,4 +1,4 @@
-#%% Useful starting lines
+# Useful starting lines
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -30,16 +30,20 @@ def standardize(tX : np.ndarray) -> np.ndarray:
 tX = standardize(tX)
 
 # Fitting the regressor
-from implementations import least_squares_GD
+from implementations import *
 
 initial_w = np.ones(30, dtype=float)
 weights, loss = least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1)
+
+# Fitting the regressor
+weights, loss = least_squares(y, tX)
+
 
 # Obtaining the test-data
 DATA_TEST_PATH = 'data/test.csv'
 _, tX_test, ids_test = load_csv_data(DATA_TEST_PATH)
 
 # Creating the predictions
-OUTPUT_PATH = 'data/submission.csv'
+OUTPUT_PATH = 'data/submission_ls.csv'
 y_pred = predict_labels(weights, tX_test)
 create_csv_submission(ids_test, y_pred, OUTPUT_PATH)
