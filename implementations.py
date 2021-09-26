@@ -41,7 +41,9 @@ def least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1):
     -----
     >>> y, tX, _ = load_csv_data([TRAINING_DATA_PATH])
     >>> initial_w = np.zeros(tX.shape[1], dtype=float)
-    >>> w, loss = least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1)
+    >>> max_iters = 100
+    >>> gamma = 0.1
+    >>> w, loss = least_squares_GD(y, tX, initial_w, max_iters, gamma)
 
     """
 
@@ -95,4 +97,44 @@ def least_squares(y, tX):
 
     return w, loss
 
-# %%
+def ridge_regression(y, tX, lambda_=0.1):
+    """
+    Exact analytical solution for the weights using the ridge-regularized
+    normal equations.
+
+    Parameters
+    ----------
+    y : np.ndarray
+        Vector with the labels.
+    tX : np.ndarray
+        Array with the samples as rows and the features as columns.
+    lambda_ : float, default=0.1
+        Ridge-regularization parameter.
+
+    Returns
+    -------
+    w : np.ndarray
+        Vector containing the final weights.
+    loss : float
+        Mean squared error loss function evaluated with the final weights.
+
+    References
+    ----------
+    [3] M. Jaggi, and M. E. Khan, "Regularization: Ridge Regression and Lasso",
+        Machine Learning (CS-433), p. 3, September XX, 2021.
+
+    Usage
+    -----
+    >>> y, tX, _ = load_csv_data([TRAINING_DATA_PATH])
+    >>> lambda = 0.1
+    >>> w, loss = least_squares(y, tX, lambda)
+
+    """
+
+    # Computing the exact analytical weights using the formula provided in [2]
+    w = np.linalg.inv(tX.T @ tX + lambda_ / (2 * tX.shape[1]) * np.identity(tX.shape[1])) @ tX.T @ y
+
+    # Computing loss for the final weights
+    loss = (y - tX @ w).T @ (y - tX @ w) / (2 * len(y))
+
+    return w, loss
