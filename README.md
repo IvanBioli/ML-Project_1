@@ -42,11 +42,11 @@ ML_project1
   - [ ] Validate regressor
   - [x] Create documentation
   - [x] Include it in `run.py`
-- [ ] Implement `ridge_regression()` regressor
-  - [ ] Write the source code
+- [x] Implement `ridge_regression()` regressor
+  - [x] Write the source code
   - [ ] Validate regressor
-  - [ ] Create documentation
-  - [ ] Include it in `run.py`
+  - [x] Create documentation
+  - [x] Include it in `run.py`
 - [ ] Implement `logistic_regression()` regressor
   - [ ] Write the source code
   - [ ] Validate regressor
