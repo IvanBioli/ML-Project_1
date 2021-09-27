@@ -29,24 +29,28 @@ ML_project1
 ### Regressors
 - [ ] Implement `least_squares_GD()` regressor
   - [x] Write the source code
-  - [ ] Validate regressor
   - [x] Create documentation
   - [x] Include it in `run.py`
-- [ ] Implement `least_squares_SGD()` regressor
-  - [ ] Write the source code
   - [ ] Validate regressor
-  - [ ] Create documentation
-  - [ ] Include it in `run.py`
+  - [ ] Optimize regressor
+- [ ] Implement `least_squares_SGD()` regressor
+  - [x] Write the source code
+  - [x] Create documentation
+  - [x] Include it in `run.py`
+  - [ ] Validate regressor
+  - [ ] Optimize regressor
 - [ ] Implement `least_squares()` regressor
   - [x] Write the source code
-  - [ ] Validate regressor
   - [x] Create documentation
   - [x] Include it in `run.py`
+  - [ ] Validate regressor
+  - [ ] Optimize regressor
 - [ ] Implement `ridge_regression()` regressor
   - [x] Write the source code
-  - [ ] Validate regressor
   - [x] Create documentation
   - [x] Include it in `run.py`
+  - [ ] Validate regressor
+  - [ ] Optimize regressor
 - [ ] Implement `logistic_regression()` regressor
   - [ ] Write the source code
   - [ ] Validate regressor
@@ -60,6 +64,7 @@ ML_project1
 
 ### `run.py`
 - [ ] Automate regressor calling
+- [ ] Maybe input hyperparameters with keyword arguments?
 
 ### Competition
 - [ ] Create a team
@@ -67,6 +72,7 @@ ML_project1
 - [ ] Create an improved regressor
   - [ ] Only use the most indicative features
   - [ ] Find best hyperparameters
+  - [ ] Emulate a randomforest? (pool multiple randomized gradient descents)
 
 ### Report
 - [ ] Create a layout and the structure

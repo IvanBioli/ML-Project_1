@@ -59,6 +59,63 @@ def least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1):
 
     return w, loss
 
+def least_squares_SGD(y, tX, initial_w, max_iters=100, gamma=0.1):
+    """
+    Stochastic gradient descent algorithm for mean squared error (MSE) loss.
+
+    Parameters
+    ----------
+    y : np.ndarray
+        Vector with the labels.
+    tX : np.ndarray
+        Array with the samples as rows and the features as columns.
+    initial_w : np.ndarray
+        Vector with initial weights to start the iteration from.
+    max_iters : int, default=100
+        Maximum number of iterations.
+    gamma : float, default=0.1
+        Scaling factor for the gradient subtraction.
+
+    Returns
+    -------
+    w : np.ndarray
+        Vector containing the final weights.
+    loss : float
+        Mean squared error loss function evaluated with the final weights.
+
+    References
+    ----------
+    [2] M. Jaggi, and M. E. Khan, "Optimization", Machine Learning (CS-433),
+        pp. 8-10, September 23, 2021.
+
+    Usage
+    -----
+    >>> y, tX, _ = load_csv_data([TRAINING_DATA_PATH])
+    >>> initial_w = np.zeros(tX.shape[1], dtype=float)
+    >>> max_iters = 100
+    >>> gamma = 0.1
+    >>> w, loss = least_squares_GD(y, tX, initial_w, max_iters, gamma)
+    
+    """
+
+    w = initial_w
+
+    for n_iter in range(max_iters):
+
+        # Sampling a random index
+        rand_ind = np.random.choice(np.arange(len(y)))
+
+        y_rand = y[rand_ind]
+        tX_rand = tX[rand_ind]
+
+        # Updating weights with scaled negative gradient
+        w = w - gamma * np.dot(- tX_rand.T, y_rand - tX_rand @ w) / 2
+
+    # Computing loss for the final weights
+    loss = np.dot((y_rand - tX_rand @ w).T, y_rand - tX_rand @ w) / 2
+
+    return w, loss
+
 def least_squares(y, tX):
     """
     Exact analytical solution for the weights using the normal equation.

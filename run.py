@@ -17,16 +17,16 @@ y, tX, ids = load_csv_data(DATA_TRAIN_PATH)
 tX = standardize(tX)
 
 
-# Fitting the regressors
+#%% Fitting the regressors
 from implementations import *
 
 initial_w = np.ones(30, dtype=float)
 gamma = 0.1
-max_iters=100
+max_iters = 100
 lambda_ = 0.1
 
 weights, loss = least_squares_GD(y, tX, initial_w, max_iters, gamma)
-# weights, loss = least_squares_SGD(y, tX, initial_w, max_iters, gamma)
+weights, loss = least_squares_SGD(y, tX, initial_w, max_iters, gamma)
 weights, loss = least_squares(y, tX)
 weights, loss = ridge_regression(y, tX, lambda_)
 # weights, loss = logistic_regression(y, tX, initial_w, max_iters, gamma)
@@ -40,3 +40,5 @@ _, tX_test, ids_test = load_csv_data(DATA_TEST_PATH)
 OUTPUT_PATH = 'data/submission.csv'
 y_pred = predict_labels(weights, tX_test)
 create_csv_submission(ids_test, y_pred, OUTPUT_PATH)
+
+# %%
