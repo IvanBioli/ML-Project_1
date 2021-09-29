@@ -8,9 +8,13 @@ What's this project all about.
 ## Schedule
 
 07.10.2021 - All functions implemented
+
 14.10.2021 - First draft of report
+
 21.10.2021 - Optimized regressor
+
 28.10.2021 - Finished version of code / report
+
 01.11.2021 - Finishing touches
 
 
