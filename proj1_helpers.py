@@ -24,26 +24,6 @@ def load_csv_data(data_path, sub_sample=False):
     return yb, input_data, ids
 
 
-def standardize(tX : np.ndarray) -> np.ndarray:
-    """
-    Standardizes the columns in x to zero mean and unit variance.
-
-    Parameters
-    ----------
-    tX : np.ndarray
-        Array with the samples as rows and the features as columns.
-
-    Returns
-    -------
-    tX_std : np.ndarray
-        Standardized x with zero feature-means and unit feature-variance.
-    """
-
-    tX_std = (tX - np.mean(tX, axis=0)) / np.std(tX, axis=0)
-
-    return tX_std
-
-
 def predict_labels(weights, data):
     """Generates class predictions given weights, and a test data matrix"""
     y_pred = np.dot(data, weights)

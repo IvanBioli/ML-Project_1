@@ -8,6 +8,27 @@ Collection of machine learning algorithms for the project 1.
 
 import numpy as np
 
+
+def standardize(tX : np.ndarray) -> np.ndarray:
+    """
+    Standardizes the columns in x to zero mean and unit variance.
+
+    Parameters
+    ----------
+    tX : np.ndarray
+        Array with the samples as rows and the features as columns.
+
+    Returns
+    -------
+    tX_std : np.ndarray
+        Standardized x with zero feature-means and unit feature-variance.
+    """
+
+    tX_std = (tX - np.mean(tX, axis=0)) / np.std(tX, axis=0)
+
+    return tX_std
+
+
 def least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1):
     """
     Gradient descent algorithm for mean squared error (MSE) loss function.
@@ -59,6 +80,7 @@ def least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1):
 
     return w, loss
 
+
 def least_squares_SGD(y, tX, initial_w, max_iters=100, gamma=0.1):
     """
     Stochastic gradient descent algorithm for mean squared error (MSE) loss.
@@ -95,7 +117,7 @@ def least_squares_SGD(y, tX, initial_w, max_iters=100, gamma=0.1):
     >>> max_iters = 100
     >>> gamma = 0.1
     >>> w, loss = least_squares_GD(y, tX, initial_w, max_iters, gamma)
-    
+
     """
 
     w = initial_w
@@ -115,6 +137,7 @@ def least_squares_SGD(y, tX, initial_w, max_iters=100, gamma=0.1):
     loss = np.dot((y_rand - tX_rand @ w).T, y_rand - tX_rand @ w) / 2
 
     return w, loss
+
 
 def least_squares(y, tX):
     """
@@ -153,6 +176,7 @@ def least_squares(y, tX):
     loss = (y - tX @ w).T @ (y - tX @ w) / (2 * len(y))
 
     return w, loss
+
 
 def ridge_regression(y, tX, lambda_=0.1):
     """
@@ -194,4 +218,91 @@ def ridge_regression(y, tX, lambda_=0.1):
     # Computing loss for the final weights
     loss = (y - tX @ w).T @ (y - tX @ w) / (2 * len(y))
 
+    return w, loss
+
+
+def logistic_regression(y, tX, initial_w, max_iters=100, gamma=0.1):
+    """
+    ???
+
+    Parameters
+    ----------
+    y : np.ndarray
+        Vector with the labels.
+    tX : np.ndarray
+        Array with the samples as rows and the features as columns.
+    initial_w : np.ndarray
+        Vector with initial weights to start the iteration from.
+    max_iters : int, default=100
+        Maximum number of iterations.
+    gamma : float, default=0.1
+        Scaling factor for the gradient subtraction.
+
+    Returns
+    -------
+    w : np.ndarray
+        Vector containing the final weights.
+    loss : float
+        Mean squared error loss function evaluated with the final weights.
+
+    References
+    ----------
+    [?]
+
+    Usage
+    -----
+    >>> y, tX, _ = load_csv_data([TRAINING_DATA_PATH])
+    >>> initial_w = np.zeros(tX.shape[1], dtype=float)
+    >>> max_iters = 100
+    >>> gamma = 0.1
+    >>> w, loss = logistic_regression(y, tX, initial_w, max_iters, gamma)
+
+    """
+
+    raise Exception("Error! This regressor is not implemented yet.")
+    return w, loss
+
+
+def reg_logistic_regression(y, tX, lambda_, initial_w, max_iters=100, gamma=0.1):
+    """
+    ???
+
+    Parameters
+    ----------
+    y : np.ndarray
+        Vector with the labels.
+    tX : np.ndarray
+        Array with the samples as rows and the features as columns.
+    lambda_ : float
+        Regularization parameter.
+    initial_w : np.ndarray
+        Vector with initial weights to start the iteration from.
+    max_iters : int, default=100
+        Maximum number of iterations.
+    gamma : float, default=0.1
+        Scaling factor for the gradient subtraction.
+
+    Returns
+    -------
+    w : np.ndarray
+        Vector containing the final weights.
+    loss : float
+        Mean squared error loss function evaluated with the final weights.
+
+    References
+    ----------
+    [?]
+
+    Usage
+    -----
+    >>> y, tX, _ = load_csv_data([TRAINING_DATA_PATH])
+    >>> lambda_ = 0.1
+    >>> initial_w = np.zeros(tX.shape[1], dtype=float)
+    >>> max_iters = 100
+    >>> gamma = 0.1
+    >>> w, loss = logistic_regression(y, tX, initial_w, max_iters, gamma)
+
+    """
+
+    raise Exception("Error! This regressor is not implemented yet.")
     return w, loss
