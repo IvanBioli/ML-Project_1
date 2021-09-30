@@ -22,14 +22,15 @@ What's this project all about.
 
 ```
 ML_project1 
-│   README.md 
-│   implementations.py      (Contains all the functions) 
-│   run.py                  (To be executed to get the results) 
+│   README.md               (The file you are reading right now)
 │   proj1_helpers.py        (Helping functions)
+|   project1.ipynb          (Notebook for testing and optimizing purposes)
+│   implementations.py      (Contains all the implemented regressors and functions) 
+│   run.py                  (To be executed to get the results) 
 │
 └───data
-│   │   test.csv	    (Test data)
-│   │   train.csv	    (Training data)
+│   │   test.csv	        (Test data)
+│   │   train.csv	        (Training data)
 │   │   submission.csv      (Submitted predictions)
 │   
 └───report
@@ -44,25 +45,25 @@ ML_project1
   - [x] Write the source code
   - [x] Create documentation
   - [x] Include it in `run.py`
-  - [ ] Validate regressor
+  - [x] Validate regressor
   - [ ] Optimize regressor
 - [ ] Implement `least_squares_SGD()` regressor
   - [x] Write the source code
   - [x] Create documentation
   - [x] Include it in `run.py`
-  - [ ] Validate regressor
+  - [x] Validate regressor
   - [ ] Optimize regressor
 - [ ] Implement `least_squares()` regressor
   - [x] Write the source code
   - [x] Create documentation
   - [x] Include it in `run.py`
-  - [ ] Validate regressor
+  - [x] Validate regressor
   - [ ] Optimize regressor
 - [ ] Implement `ridge_regression()` regressor
   - [x] Write the source code
   - [x] Create documentation
   - [x] Include it in `run.py`
-  - [ ] Validate regressor
+  - [x] Validate regressor
   - [ ] Optimize regressor
 - [ ] Implement `logistic_regression()` regressor
   - [ ] Write the source code
@@ -80,7 +81,7 @@ ML_project1
 - [ ] Maybe input hyperparameters with keyword arguments?
 
 ### Competition
-- [ ] Create a team
+- [x] Create a team
 - [ ] Submit predictions
 - [ ] Create an improved regressor
   - [ ] Only use the most indicative features
