@@ -73,10 +73,12 @@ def least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1):
     for n_iter in range(max_iters):
 
         # Updating weights with scaled negative gradient
-        w = w - gamma * (- tX.T @ (y - tX @ w) / (2 * len(y)))
+        e = y - tX @ w
+        w = w - gamma * ( - tX.T @ e / (2 * len(y)))
 
     # Computing loss for the final weights
-    loss = (y - tX @ w).T @ (y - tX @ w) / (2 * len(y))
+    e = y - tX @ w
+    loss = e.T @ e / (2 * len(y))
 
     return w, loss
 
@@ -122,13 +124,13 @@ def least_squares_SGD(y, tX, initial_w, max_iters=100, gamma=0.1):
 
     w = initial_w
 
-    for n_iter in range(max_iters):
+    # Sampling random sequence of indices
+    rand_ind = np.random.choice(np.arange(len(y)), max_iters, replace=False)
 
-        # Sampling a random index
-        rand_ind = np.random.choice(np.arange(len(y)))
+    for i in range(max_iters):
 
-        y_rand = y[rand_ind]
-        tX_rand = tX[rand_ind]
+        y_rand = y[rand_ind[i]]
+        tX_rand = tX[rand_ind[i]]
 
         # Updating weights with scaled negative gradient
         w = w - gamma * np.dot(- tX_rand.T, y_rand - tX_rand @ w) / 2
@@ -173,7 +175,8 @@ def least_squares(y, tX):
     w = np.linalg.inv(tX.T @ tX) @ tX.T @ y
 
     # Computing loss for the final weights
-    loss = (y - tX @ w).T @ (y - tX @ w) / (2 * len(y))
+    e = y - tX @ w
+    loss = e.T @ e / (2 * len(y))
 
     return w, loss
 
@@ -213,10 +216,12 @@ def ridge_regression(y, tX, lambda_=0.1):
     """
 
     # Computing the exact analytical weights using the formula provided in [2]
-    w = np.linalg.inv(tX.T @ tX + lambda_ / (2 * tX.shape[1]) * np.identity(tX.shape[1])) @ tX.T @ y
+    perturbation = lambda_ * 2 * tX.shape[0] * np.identity(tX.shape[1])
+    w = np.linalg.inv(tX.T @ tX + perturbation) @ tX.T @ y
 
     # Computing loss for the final weights
-    loss = (y - tX @ w).T @ (y - tX @ w) / (2 * len(y))
+    e = y - tX @ w
+    loss = e.T @ e / (2 * len(y))
 
     return w, loss
 
