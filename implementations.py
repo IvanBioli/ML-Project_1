@@ -76,7 +76,7 @@ def least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1):
         e = y - tX @ w
         w = w - gamma * ( - tX.T @ e / (2 * len(y)))
 
-    # Computing loss for the final weights
+    # Computing loss for the final weights (MSE)
     e = y - tX @ w
     loss = e.T @ e / (2 * len(y))
 
@@ -135,7 +135,7 @@ def least_squares_SGD(y, tX, initial_w, max_iters=100, gamma=0.1):
         # Updating weights with scaled negative gradient
         w = w - gamma * np.dot(- tX_rand.T, y_rand - tX_rand @ w) / 2
 
-    # Computing loss for the final weights
+    # Computing loss for the final weights (MSE)
     loss = np.dot((y_rand - tX_rand @ w).T, y_rand - tX_rand @ w) / 2
 
     return w, loss
@@ -174,7 +174,7 @@ def least_squares(y, tX):
     # Computing the exact analytical weights using the formula provided in [2]
     w = np.linalg.inv(tX.T @ tX) @ tX.T @ y
 
-    # Computing loss for the final weights
+    # Computing loss for the final weights (MSE)
     e = y - tX @ w
     loss = e.T @ e / (2 * len(y))
 
@@ -219,7 +219,7 @@ def ridge_regression(y, tX, lambda_=0.1):
     perturbation = lambda_ * 2 * tX.shape[0] * np.identity(tX.shape[1])
     w = np.linalg.inv(tX.T @ tX + perturbation) @ tX.T @ y
 
-    # Computing loss for the final weights
+    # Computing loss for the final weights (MSE)
     e = y - tX @ w
     loss = e.T @ e / (2 * len(y))
 
@@ -228,7 +228,7 @@ def ridge_regression(y, tX, lambda_=0.1):
 
 def logistic_regression(y, tX, initial_w, max_iters=100, gamma=0.1):
     """
-    ???
+    Gradient descent regressor with logistic loss function.
 
     Parameters
     ----------
@@ -252,7 +252,8 @@ def logistic_regression(y, tX, initial_w, max_iters=100, gamma=0.1):
 
     References
     ----------
-    [?]
+    [4] M. Jaggi, and M. E. Khan, "Logistic Regression",
+        Machine Learning (CS-433), pp. 2-12, October XX, 2021.
 
     Usage
     -----
@@ -264,13 +265,34 @@ def logistic_regression(y, tX, initial_w, max_iters=100, gamma=0.1):
 
     """
 
-    raise Exception("Error! This regressor is not implemented yet.")
+    w = initial_w
+
+    # *_clipped quantities are there to ensure that np.exp(x) won't overflow,
+    # because for x > 710 => exp(x) > 1.8e+308 > np.finfo('d').max.
+    # They also ensure that np.log(x) won't be passed any non-positive values.
+    for i in range(max_iters):
+
+        # Evaluating the logistic function
+        tXw_clipped = np.clip(tX @ w, -709*np.ones(len(y)), 709*np.ones(len(y)))
+        sigma = 1 / (1 + np.exp( - tXw_clipped))
+
+        # Updating weights with scaled negative gradient
+        w = w - gamma * tX.T @ (sigma - y)
+
+    # Computing loss for the final weights
+    tXw_clipped = np.clip(tX @ w, -709*np.ones(len(y)), 709*np.ones(len(y)))
+    sigma = 1 / (1 + np.exp( - tXw_clipped))
+
+    sigma_clipped1 = np.clip(sigma, 1e-10, 709*np.ones(len(sigma)))
+    sigma_clipped2 = np.clip(sigma, -709*np.ones(len(sigma)), -1e-10)
+    loss = y.T @ np.log(sigma_clipped1) + (1.0 - y).T @ np.log(1.0 - np.exp(sigma_clipped2))
+
     return w, loss
 
 
 def reg_logistic_regression(y, tX, lambda_, initial_w, max_iters=100, gamma=0.1):
     """
-    ???
+    Gradient descent regressor with (ridge) regularized logistic loss function.
 
     Parameters
     ----------
@@ -296,7 +318,8 @@ def reg_logistic_regression(y, tX, lambda_, initial_w, max_iters=100, gamma=0.1)
 
     References
     ----------
-    [?]
+    [5] M. Jaggi, and M. E. Khan, "Logistic Regression",
+        Machine Learning (CS-433), pp. 16-17, October XX, 2021.
 
     Usage
     -----
@@ -309,5 +332,26 @@ def reg_logistic_regression(y, tX, lambda_, initial_w, max_iters=100, gamma=0.1)
 
     """
 
-    raise Exception("Error! This regressor is not implemented yet.")
+    w = initial_w
+
+    # *_clipped quantities are there to ensure that np.exp(x) won't overflow,
+    # because for x > 710 => exp(x) > 1.8e+308 > np.finfo('d').max.
+    # They also ensure that np.log(x) won't be passed any non-positive values.
+    for i in range(max_iters):
+
+        # Evaluating the logistic function
+        tXw_clipped = np.clip(tX @ w, -709*np.ones(len(y)), 709*np.ones(len(y)))
+        sigma = 1 / (1 + np.exp( - tXw_clipped))
+
+        # Updating weights with scaled negative gradient (with penalty term [5])
+        w = w - gamma * (tX.T @ (sigma - y) + lambda_ * w)
+
+    # Computing loss for the final weights
+    tXw_clipped = np.clip(tX @ w, -709*np.ones(len(y)), 709*np.ones(len(y)))
+    sigma = 1 / (1 + np.exp( - tXw_clipped))
+
+    sigma_clipped1 = np.clip(sigma, 1e-10, 709*np.ones(len(sigma)))
+    sigma_clipped2 = np.clip(sigma, -709*np.ones(len(sigma)), -1e-10)
+    loss = y.T @ np.log(sigma_clipped1) + (1.0 - y).T @ np.log(1.0 - np.exp(sigma_clipped2)) + lambda_ * w.T @ w / 2
+
     return w, loss
