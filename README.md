@@ -17,6 +17,23 @@ What's this project all about.
 
 01.11.2021 - Finishing touches
 
+## Optimization ideas
+[ ] Preprocessing
+  [ ] Remove features that are not relevant
+  [ ] Boost features that really matter
+  [ ] Check for values that are automatically set at some values (they might be outliers, but be careful because there could be outliers in the test dataset)
+  [ ] Do some research on preprocessing
+  [ ] Understand which features affect most our predictions
+
+[ ] Iterative Optimization
+  [ ] Ideal parameters for GD, SGD and other algorithms
+  [ ] Try different loss functions (MSE is a lot affected by outliers)
+  [ ] Change the step size every iteration
+  [ ] Stopping criterion
+
+[ ] New approach
+  [ ] Ensemble regressor
+
 
 ## File structure
 

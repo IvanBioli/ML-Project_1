@@ -74,11 +74,12 @@ def least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1):
 
         # Updating weights with scaled negative gradient
         e = y - tX @ w
-        w = w - gamma * ( - tX.T @ e / (2 * len(y)))
+        w = w + tX.T @ e * (gamma / len(y))         #only one multiplication scalar-matrix
+                                                    #TODO: check if with y too big this creates problems since (gamma/len(y)) could be really small (even under epsilon machine)
 
     # Computing loss for the final weights (MSE)
     e = y - tX @ w
-    loss = e.T @ e / (2 * len(y))
+    loss = np.mean(e**2) / 2
 
     return w, loss
 
@@ -123,20 +124,22 @@ def least_squares_SGD(y, tX, initial_w, max_iters=100, gamma=0.1):
     """
 
     w = initial_w
+    N = len(y)
 
     # Sampling random sequence of indices
     rand_ind = np.random.choice(np.arange(len(y)), max_iters, replace=False)
 
     for i in range(max_iters):
-
         y_rand = y[rand_ind[i]]
         tX_rand = tX[rand_ind[i]]
-
         # Updating weights with scaled negative gradient
-        w = w - gamma * np.dot(- tX_rand.T, y_rand - tX_rand @ w) / 2
+        w = w + (gamma * (y_rand - np.inner(tX_rand, w)) / N) * tX_rand         #use np.inner instead of np.dot better only one matrix-vector multiplication
+                                                                                #TODO: check if with y too big this creates problems since (gamma/len(y)) could be really small (even under epsilon machine)
+        # TODO: find a way to stop the algorithm efficiently
 
     # Computing loss for the final weights (MSE)
-    loss = np.dot((y_rand - tX_rand @ w).T, y_rand - tX_rand @ w) / 2
+    e = y - tX @ w                                                    #Compute the error e only once
+    loss = np.mean(e**2) / 2
 
     return w, loss
 
