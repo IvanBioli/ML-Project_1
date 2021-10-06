@@ -2,7 +2,7 @@
 
 ## Explanation
 
-What's this project all about.
+TODO.
 
 
 ## Schedule
@@ -112,3 +112,5 @@ ML_project1
 - [ ] Illustrate our results
 
 ## References
+
+TODO.
