@@ -1,0 +1,64 @@
+%%% LANGUAGE AND FONTS
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[activate={true,nocompatibility},
+            final,
+            tracking=true,
+            kerning=true,
+            spacing=true,
+            factor=1100,
+            stretch=10,
+            shrink=10]{microtype}
+
+% Phrasing packages
+\usepackage[english]{babel}
+\usepackage{csquotes}
+
+% Fonts
+\usepackage{palatino}
+\usepackage{eulervm}
+
+
+%%% PAGE LAYOUT
+\usepackage[textwidth=450pt,
+            textheight=650pt,
+            headheight=0pt,
+            voffset=0pt]{geometry}
+
+
+%%% COLOR DEFINITIONS
+\usepackage{xcolor}
+\definecolor{darkblue}{rgb}{0.0313, 0.1882, 0.4196}
+\definecolor{normalblue}{rgb}{0.1294, 0.4431, 0.7098}
+\definecolor{lightblue}{rgb}{0.4235, 0.6823, 0.8392}
+
+
+%%% REFERENCING
+\usepackage[numbers]{natbib}
+\bibliographystyle{rusnat}
+
+% Links
+\usepackage{url}
+\urlstyle{same}
+
+% Clickable references
+\usepackage[]{hyperref}
+
+%%% FIGURES AND TABLES
+\usepackage{graphicx}
+\usepackage{tikz}
+
+% Table layouting
+\usepackage{booktabs}
+
+% Caption format
+\usepackage[font=small,
+            labelfont=bf,
+            labelsep=endash,
+            margin=\parindent,
+            tableposition=top]{caption}
+
+
+%%% MATHEMATICS
+\usepackage{amsmath}
+\usepackage{amssymb}

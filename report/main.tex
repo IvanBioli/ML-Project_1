@@ -1,0 +1,70 @@
+\documentclass[11pt, a4paper, twocolumn]{article}
+
+\usepackage{style}
+\usepackage{blindtext} % Blindtext generator (to be removed later on)
+
+% Information for generating title
+\title{\bfseries Machine Learning: Project 1}
+\author{\textbf{Olivier Stähli} \\ \href{mailto:olivier.staehli@epfl.ch}{olivier.staehli@epfl.ch}
+   \and \textbf{Ivan Bioli} \\ \href{mailto:ivan.bioli@epfl.ch}{ivan.bioli@epfl.ch}
+   \and \textbf{Fabio Matti} \\ \href{mailto:fabio.matti@epfl.ch}{fabio.matti@epfl.ch}}
+\date{}
+
+\begin{document}
+
+% Escaping twocolumn-layout to generate titlelines and abstract
+\twocolumn[
+  \begin{@twocolumnfalse}
+    \vspace{-1.5cm}
+    \maketitle
+    \begin{abstract}
+        \blindtext
+    \end{abstract}
+    \vspace{0.75cm}
+  \end{@twocolumnfalse}
+]
+
+\section{First section}
+\label{sec:firstsection}
+
+\blindtext \cite{jaggi2021}
+
+\begin{equation}
+    a^2 + b^2 = c^2
+    \label{eq:pythaoras}
+\end{equation}
+
+\blindtext 
+
+\begin{table}[h]
+    \caption{Test}
+    \label{tab:test}
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{@{}lcc@{}}
+        \toprule
+        Name & Age & Height \\
+        \midrule
+        Fabio & 23 & 181 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\blindtext 
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+        \fill[color=darkblue] (-3, -0.5) rectangle (-2, 0.5);
+        \fill[color=normalblue] (-0.5, -0.5) rectangle (0.5, 0.5);
+        \fill[color=lightblue] (2, -0.5) rectangle (3, 0.5);
+    \end{tikzpicture}
+    \caption{Color scheme}
+    \label{fig:theme}
+\end{figure}
+
+\blindtext 
+
+\bibliography{biblio.bib}
+
+\end{document}
