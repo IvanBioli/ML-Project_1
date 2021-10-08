@@ -31,7 +31,7 @@ def standardize(tX):
 
 def polynomial_basis(tX, degrees):
     """
-    Standardizes the columns in x to zero mean and unit variance.
+    Creates a polynomial basis from tX.
 
     Parameters
     ----------
