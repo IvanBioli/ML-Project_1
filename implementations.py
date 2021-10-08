@@ -3,13 +3,13 @@
 Implementations
 ***************
 
-Collection of machine learning algorithms for the project 1.
+Collection of functions developed for the machine learning project 1.
 """
 
 import numpy as np
 
 
-def standardize(tX : np.ndarray) -> np.ndarray:
+def standardize(tX):
     """
     Standardizes the columns in x to zero mean and unit variance.
 
@@ -27,6 +27,39 @@ def standardize(tX : np.ndarray) -> np.ndarray:
     tX_std = (tX - np.mean(tX, axis=0)) / np.std(tX, axis=0)
 
     return tX_std
+
+
+def polynomial_basis(tX, degrees):
+    """
+    Standardizes the columns in x to zero mean and unit variance.
+
+    Parameters
+    ----------
+    tX : np.ndarray
+        Array with the samples as rows and the features as columns.
+    degrees : list
+        List with the polynomial degrees that should be used as basis elements.
+
+    Returns
+    -------
+    tX_polynomial : np.ndarray
+        tX in a polynomial basis.
+    """
+
+    tX_polynomial = tX
+
+    for deg in degrees:
+
+        # Treating degree zero separately to avoid duplicated columns
+        if deg == 0:
+
+            tX_polynomial = np.column_stack((np.ones(tX.shape[0]), tX_polynomial))
+
+        elif deg > 1:
+
+            tX_polynomial = np.column_stack((tX_polynomial, standardize(tX**deg)))
+
+    return tX_polynomial
 
 
 def least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1):
