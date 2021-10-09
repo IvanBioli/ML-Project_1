@@ -4,6 +4,9 @@ Implementations
 ***************
 
 Collection of functions developed for the machine learning project 1.
+
+The function descriptions were heavily inspired by the sklearn package.
+
 """
 
 import numpy as np
@@ -11,7 +14,7 @@ import numpy as np
 
 def standardize(tX):
     """
-    Standardizes the columns in x to zero mean and unit variance.
+    Standardizes the columns in tX to zero mean and unit variance.
 
     Parameters
     ----------
@@ -21,15 +24,47 @@ def standardize(tX):
     Returns
     -------
     tX_std : np.ndarray
-        Standardized x with zero feature-means and unit feature-variance.
+        Standardized tX with zero feature-means and unit feature-variance.
+
+    Usage
+    -----
+    >>> tX = np.array([[1, 2],
+                       [0, 4],
+                       [1, 3]])
+    >>> tX_std = standardize(tX)
+    >>> print(tX_std)
+    [[ 0.70710678 -1.22474487]
+     [-1.41421356  1.22474487]
+     [ 0.70710678  0.        ]]
+
     """
 
-    tX_std = (tX - np.mean(tX, axis=0)) / np.std(tX, axis=0)
+    # Calculating the standardization values (feature-wise)
+    feature_mean = np.mean(tX, axis=0)
+    feature_std = np.std(tX, axis=0)
+
+    # Checking for features with zero standard deviation
+    zero_ind = np.argwhere(feature_std == 0)
+
+    if len(zero_ind) == 0:
+
+        tX_std = (tX - feature_mean) / feature_std
+
+    else:
+
+        tX_std = tX - feature_mean
+
+        # Leaving features with zero variance unchanged
+        feature_std[zero_ind] = 1
+        tX_std /= feature_std
+
+        print("WARNING: Zero variance feature encountered.")
+        print("         Only standardized this one with the feature-mean.")
 
     return tX_std
 
 
-def polynomial_basis(tX, degrees):
+def polynomial_basis(tX, degrees, std=False):
     """
     Creates a polynomial basis from tX.
 
@@ -37,29 +72,68 @@ def polynomial_basis(tX, degrees):
     ----------
     tX : np.ndarray
         Array with the samples as rows and the features as columns.
-    degrees : list
-        List with the polynomial degrees that should be used as basis elements.
+    degrees : list or int
+        List (or int) with the polynomial degrees (or maximum polynomial degree)
+        that should be used as basis elements.
+    std : bool, default=False
+        Standardize features of each polynomial basis element.
 
     Returns
     -------
-    tX_polynomial : np.ndarray
+    tX_poly : np.ndarray
         tX in a polynomial basis.
+
+    Notes
+    -----
+    The degree 0 is the offset-vector containing just ones. When passing the
+    maximum polynomial degree as an integer as 'degrees=max_degree', this
+    offset-vector is automatically added to tX. If you don't want it included,
+    pass 'degrees=range(1, max_degree + 1)' instead.
+
+    Usage
+    -----
+    >>> tX = np.array([1, 2, 3, 4])
+    >>> tX_poly = polynomial_basis(tX, [0, 1, 2])
+    >>> print(tX_poly)
+    [[ 1.  1.  1.]
+     [ 1.  2.  4.]
+     [ 1.  3.  9.]
+     [ 1.  4. 16.]]
+
     """
 
-    tX_polynomial = tX
+    # Checking if integer was passed as 'degrees', and converting it to a list
+    if isinstance(degrees, int):
+
+        degrees = range(degrees + 1)
+
+    # Always including the original features (degree 1) as a basis-element
+    if std:
+
+        tX_poly = standardize(tX)
+
+    else:
+
+        tX_poly = tX
 
     for deg in degrees:
 
         # Treating degree zero separately to avoid duplicated columns
         if deg == 0:
 
-            tX_polynomial = np.column_stack((np.ones(tX.shape[0]), tX_polynomial))
+            tX_poly = np.column_stack((np.ones(tX.shape[0]), tX_poly))
 
         elif deg > 1:
 
-            tX_polynomial = np.column_stack((tX_polynomial, standardize(tX**deg)))
+            if std:
 
-    return tX_polynomial
+                tX_poly = np.column_stack((tX_poly, standardize(tX**deg)))
+
+            else:
+
+                tX_poly = np.column_stack((tX_poly, tX**deg))
+
+    return tX_poly
 
 
 def least_squares_GD(y, tX, w_init, max_iters=100, gamma=0.1, tol=None):
@@ -101,7 +175,7 @@ def least_squares_GD(y, tX, w_init, max_iters=100, gamma=0.1, tol=None):
     >>> w_init = np.array([1])
     >>> w, loss = least_squares_GD(y, tX, w_init)
     >>> print(w, loss)
-    [[3.]] 0.0
+    [3.] 0.0
 
     """
 
@@ -133,7 +207,7 @@ def least_squares_GD(y, tX, w_init, max_iters=100, gamma=0.1, tol=None):
 
             if (np.linalg.norm(grad) < tol):
 
-                print("NOTE: Stopping criterion met after iteration ", iter)
+                print("NOTE: Stopping criterion met in iteration ", iter, ".")
                 break
 
     # Computing loss (MSE) for the weights in the final iteration
@@ -176,7 +250,7 @@ def least_squares_SGD(y, tX, w_init, max_iters=100, gamma=0.1, seed=None):
     [2] M. Jaggi, and M. E. Khan, "Optimization", Machine Learning (CS-433),
         pp. 8-10, September 23, 2021.
 
-    Usage 
+    Usage
     -----
     TODO
 
@@ -251,7 +325,7 @@ def least_squares(y, tX):
     >>> y = 3*tX
     >>> w, loss = least_squares(y, tX)
     >>> print(w, loss)
-    [[3.]] 0.0
+    [3.] 0.0
 
     """
 
@@ -313,7 +387,7 @@ def ridge_regression(y, tX, lambda_=0.1):
     >>> y = 3*tX
     >>> w, loss = ridge_regression(y, tX)
     >>> print(w, loss)
-    [[2.92207792]] 0.02276943835385406
+    [2.92207792] 0.02276943835385406
 
     """
 
