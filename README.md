@@ -27,6 +27,7 @@ TODO.
 
 - [ ] Iterative Optimization
   - [ ] Ideal parameters for GD, SGD and other algorithms
+  - [ ] Automatic selection of the best parameters after sampling
   - [ ] Try different loss functions (MSE is a lot affected by outliers)
   - [ ] Change the step size every iteration
   - [ ] Stopping criterion

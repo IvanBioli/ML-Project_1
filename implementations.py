@@ -135,10 +135,71 @@ def polynomial_basis(tX, degrees, std=False):
 
     return tX_poly
 
-
-def least_squares_GD(y, tX, w_init, max_iters=100, gamma=0.1, tol=None):
+def calculate_mse(e):
     """
-    Gradient descent algorithm for mean squared error (MSE) loss.
+    Calculates mean square error (MSE) for the error vector e.
+
+    Parameters
+    ----------
+    e : np.ndarray
+        Error vector.
+
+    Returns
+    -------
+    mse : float
+        Mean square error (MSE).
+
+    References
+    ----------
+    [1] M. Jaggi, and M. E. Khan, "Optimization", Machine Learning (CS-433),
+        pp. 6-7, September 23, 2021.
+
+    Usage
+    -----
+    >>> e = np.array([1, 2, 3, 4])
+    >>> mse = calculate_mse(e)
+    >>> print(mse)
+    3.75
+
+    """
+    mse = 1/2 * np.mean(e**2)
+    return mse
+
+
+def calculate_mae(e):
+    """
+    Calculates mean absolute error (MSE) for the error vector e.
+
+    Parameters
+    ----------
+    e : np.ndarray
+        Error vector.
+
+    Returns
+    -------
+    mae : float
+        Mean absolute error (MAE).
+
+    References
+    ----------
+    [2] M. Jaggi, and M. E. Khan, "Cost Functions", Machine Learning (CS-433),
+        p. 5, September 23, 2021.
+
+    Usage
+    -----
+    >>> e = np.array([-1, 2, -3, 4])
+    >>> mae = calculate_mae(e)
+    >>> print(mae)
+    2.5
+
+    """
+    mae = np.mean(np.abs(e))
+    return mae
+
+
+def compute_loss_mse(y, tx, w):
+    """
+    Computes the mean square error (MSE) loss.
 
     Parameters
     ----------
@@ -146,7 +207,83 @@ def least_squares_GD(y, tX, w_init, max_iters=100, gamma=0.1, tol=None):
         Vector with the labels.
     tX : np.ndarray
         Array with the samples as rows and the features as columns.
-    w_init : np.ndarray
+    w: np.ndarray
+        Vector containing the weights.
+
+    Returns
+    -------
+    loss : float
+        Mean square error loss function evaluated with the weights w.
+
+    References
+    ----------
+    [1] M. Jaggi, and M. E. Khan, "Optimization", Machine Learning (CS-433),
+        pp. 6-7, September 23, 2021.
+
+    Usage
+    -----
+    >>> tx = np.array([[1, 2, 3, 4], [1, 2, 3, 4]])
+    >>> y = np.array([5, 6])
+    >>> w = np.array([1, 1, 1, 1])
+    >>> loss = compute_loss_mse(y, tx, w)
+    >>> print(loss)
+    10.25
+
+    """
+    e = y - tx @ w
+    loss = calculate_mse(e)
+    return loss
+
+
+def compute_loss_mae(y, tx, w):
+    """
+    Computes the mean absolute error (MAE) loss.
+
+    Parameters
+    ----------
+    y : np.ndarray
+        Vector with the labels.
+    tX : np.ndarray
+        Array with the samples as rows and the features as columns.
+    w: np.ndarray
+        Vector containing the weights.
+
+    Returns
+    -------
+    loss : float
+        Mean absolute error loss function evaluated with the weights w.
+
+    References
+    ----------
+    [1] M. Jaggi, and M. E. Khan, "Optimization", Machine Learning (CS-433),
+        pp. 6-7, September 23, 2021.
+
+    Usage
+    -----
+    >>> tx = np.array([[1, 2, 3, 4], [1, 2, 3, 4]])
+    >>> y = np.array([5, 6])
+    >>> w = np.array([1, 1, 1, 1])
+    >>> loss = compute_loss_mae(y, tx, w)
+    >>> print(loss)
+    4.5
+
+    """
+    e = y - tx @ w
+    loss = calculate_mae(e)
+    return loss
+
+
+def least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1, tol=None):
+    """
+    Gradient descent algorithm for linear regression with mean square error (MSE) loss.
+
+    Parameters
+    ----------
+    y : np.ndarray
+        Vector with the labels.
+    tX : np.ndarray
+        Array with the samples as rows and the features as columns.
+    initial_w : np.ndarray
         Vector with initial weights to start the iteration from.
     max_iters : int, default=100
         Maximum number of iterations.
@@ -161,7 +298,7 @@ def least_squares_GD(y, tX, w_init, max_iters=100, gamma=0.1, tol=None):
     w : np.ndarray
         Vector containing the optimized weights.
     loss : float
-        Mean squared error loss function evaluated with the optimized weights.
+        Mean square error loss function evaluated with the optimized weights.
 
     References
     ----------
@@ -172,8 +309,8 @@ def least_squares_GD(y, tX, w_init, max_iters=100, gamma=0.1, tol=None):
     -----
     >>> tX = np.array([1, 2, 3, 4])
     >>> y = 3*tX
-    >>> w_init = np.array([1])
-    >>> w, loss = least_squares_GD(y, tX, w_init)
+    >>> initial_w = np.array([1])
+    >>> w, loss = least_squares_GD(y, tX, initial_w)
     >>> print(w, loss)
     [3.] 0.0
 
@@ -183,7 +320,7 @@ def least_squares_GD(y, tX, w_init, max_iters=100, gamma=0.1, tol=None):
     N = len(y)
 
     # Converting 1D arrays to 2D arrays
-    w = w_init.reshape((len(w_init), 1))
+    w = initial_w.reshape((len(initial_w), 1))
     y = y.reshape((N, 1))
 
     # Checking if 'tX' is a 1D array, and consequently converting to a 2D array
@@ -219,9 +356,9 @@ def least_squares_GD(y, tX, w_init, max_iters=100, gamma=0.1, tol=None):
     return w, loss
 
 
-def least_squares_SGD(y, tX, w_init, max_iters=100, gamma=0.1, seed=None):
+def least_squares_SGD(y, tX, initial_w, max_iters=100000, gamma=0.1, seed=None):
     """
-    Stochastic gradient descent algorithm for mean squared error (MSE) loss.
+    Stochastic gradient descent algorithm for mean square error (MSE) loss.
 
     Parameters
     ----------
@@ -229,9 +366,9 @@ def least_squares_SGD(y, tX, w_init, max_iters=100, gamma=0.1, seed=None):
         Vector with the labels.
     tX : np.ndarray
         Array with the samples as rows and the features as columns.
-    w_init : np.ndarray
+    initial_w : np.ndarray
         Vector with initial weights to start the iteration from.
-    max_iters : int, default=100
+    max_iters : int, default=100000
         Maximum number of iterations.
     gamma : float, default=0.1
         Scaling factor for the gradient subtraction.
@@ -243,16 +380,21 @@ def least_squares_SGD(y, tX, w_init, max_iters=100, gamma=0.1, seed=None):
     w : np.ndarray
         Vector containing the final weights.
     loss : float
-        Mean squared error loss function evaluated with the final weights.
+        Mean square error loss function evaluated with the final weights.
 
     References
     ----------
-    [2] M. Jaggi, and M. E. Khan, "Optimization", Machine Learning (CS-433),
+    [3] M. Jaggi, and M. E. Khan, "Optimization", Machine Learning (CS-433),
         pp. 8-10, September 23, 2021.
 
     Usage
     -----
-    TODO
+    >>> tX = np.array([1, 2, 3, 4])
+    >>> y = 3*tX
+    >>> initial_w = np.array([1])
+    >>> w, loss = least_squares_SGD(y, tX, initial_w)
+    >>> print(w, loss)
+    [3.] 0.0
 
     """
 
@@ -262,7 +404,7 @@ def least_squares_SGD(y, tX, w_init, max_iters=100, gamma=0.1, seed=None):
     N = len(y)
 
     # Converting potentially 1D arrays to 2D arrays
-    w = w_init
+    w = initial_w
 
     # Using the desired seed (if specified)
     if seed != None:
@@ -298,7 +440,7 @@ def least_squares_SGD(y, tX, w_init, max_iters=100, gamma=0.1, seed=None):
 
 def least_squares(y, tX):
     """
-    Exact analytical solution for the weights using the normal equation.
+    Exact analytical solution for the weights using the normal equations.
 
     Parameters
     ----------
@@ -312,11 +454,11 @@ def least_squares(y, tX):
     w : np.ndarray
         Vector containing the final weights.
     loss : float
-        Mean squared error loss function evaluated with the final weights.
+        Mean square error loss function evaluated with the final weights.
 
     References
     ----------
-    [3] M. Jaggi, and M. E. Khan, "Least Squares", Machine Learning (CS-433),
+    [4] M. Jaggi, and M. E. Khan, "Least Squares", Machine Learning (CS-433),
         p. 7, October 5, 2021.
 
     Usage
@@ -340,14 +482,11 @@ def least_squares(y, tX):
 
         tX = tX.reshape((N, 1))
 
-    # Solving for the exact weights according to the normal equation in [3]
+    # Solving for the exact weights according to the normal equations in [4]
     w = np.linalg.solve(np.dot(tX.T, tX), np.dot(tX.T, y))
 
-    # Computing the error
-    e = y - np.dot(tX, w)
-
     # Computing loss (MSE)
-    loss = np.mean(e**2) / 2
+    loss = compute_loss_mse(y, tX, w)
 
     # Converting weights back to 1D arrays
     w = w.reshape(len(w))
@@ -374,18 +513,19 @@ def ridge_regression(y, tX, lambda_=0.1):
     w : np.ndarray
         Vector containing the final weights.
     loss : float
-        Mean squared error loss function evaluated with the final weights.
+        Mean square error loss function evaluated with the final weights.
 
     References
     ----------
-    [4] M. Jaggi, and M. E. Khan, "Regularization: Ridge Regression and Lasso",
+    [5] M. Jaggi, and M. E. Khan, "Regularization: Ridge Regression and Lasso",
         Machine Learning (CS-433), p. 3, October 1, 2021.
 
     Usage
     -----
     >>> tX = np.array([1, 2, 3, 4])
     >>> y = 3*tX
-    >>> w, loss = ridge_regression(y, tX)
+    >>> lambda_ = 0.1
+    >>> w, loss = ridge_regression(y, tX, lambda_)
     >>> print(w, loss)
     [2.92207792] 0.02276943835385406
 
@@ -405,14 +545,11 @@ def ridge_regression(y, tX, lambda_=0.1):
     # Creating "penalty"-term for the normal equations
     penalty = lambda_ * 2 * N * np.identity(tX.shape[1])
 
-    # Solving for the exact weights according to the normal equation in [4]
+    # Solving for the exact weights according to the normal equations in [5]
     w = np.linalg.solve(np.dot(tX.T, tX) + penalty, np.dot(tX.T, y))
 
-    # Computing the error
-    e = y - np.dot(tX, w)
-
     # Computing loss (MSE)
-    loss = np.mean(e**2) / 2
+    loss = compute_loss_mse(y, tX, w)
 
     # Converting weights back to 1D arrays
     w = w.reshape(len(w))
@@ -420,7 +557,7 @@ def ridge_regression(y, tX, lambda_=0.1):
     return w, loss
 
 
-def logistic_regression(y, tX, w_init, max_iters=100, gamma=0.1):
+def logistic_regression(y, tX, initial_w, max_iters=100, gamma=0.1):
     """
     Gradient descent regressor with logistic loss function.
 
@@ -430,7 +567,7 @@ def logistic_regression(y, tX, w_init, max_iters=100, gamma=0.1):
         Vector with the labels.
     tX : np.ndarray
         Array with the samples as rows and the features as columns.
-    w_init : np.ndarray
+    initial_w : np.ndarray
         Vector with initial weights to start the iteration from.
     max_iters : int, default=100
         Maximum number of iterations.
@@ -442,11 +579,11 @@ def logistic_regression(y, tX, w_init, max_iters=100, gamma=0.1):
     w : np.ndarray
         Vector containing the final weights.
     loss : float
-        Mean squared error loss function evaluated with the final weights.
+        Mean square error loss function evaluated with the final weights.
 
     References
     ----------
-    [5] M. Jaggi, and M. E. Khan, "Logistic Regression",
+    [6] M. Jaggi, and M. E. Khan, "Logistic Regression",
         Machine Learning (CS-433), pp. 2-12, October XX, 2021.
 
     Notes
@@ -472,7 +609,7 @@ def logistic_regression(y, tX, w_init, max_iters=100, gamma=0.1):
     N = len(y)
 
     # Converting potentially 1D arrays to 2D arrays
-    w = w_init.reshape((len(w_init), 1))
+    w = initial_w.reshape((len(initial_w), 1))
     y = y.reshape((N, 1))
 
     # Checking if 'tX' is a 1D array, and consequently converting to a 2D array
@@ -508,7 +645,7 @@ def logistic_regression(y, tX, w_init, max_iters=100, gamma=0.1):
     return w, loss
 
 
-def reg_logistic_regression(y, tX, lambda_, w_init, max_iters=100, gamma=0.1):
+def reg_logistic_regression(y, tX, lambda_, initial_w, max_iters=100, gamma=0.1):
     """
     Gradient descent regressor with (ridge) regularized logistic loss function.
 
@@ -520,7 +657,7 @@ def reg_logistic_regression(y, tX, lambda_, w_init, max_iters=100, gamma=0.1):
         Array with the samples as rows and the features as columns.
     lambda_ : float
         Regularization parameter.
-    w_init : np.ndarray
+    initial_w : np.ndarray
         Vector with initial weights to start the iteration from.
     max_iters : int, default=100
         Maximum number of iterations.
@@ -532,11 +669,11 @@ def reg_logistic_regression(y, tX, lambda_, w_init, max_iters=100, gamma=0.1):
     w : np.ndarray
         Vector containing the final weights.
     loss : float
-        Mean squared error loss function evaluated with the final weights.
+        Mean square error loss function evaluated with the final weights.
 
     References
     ----------
-    [6] M. Jaggi, and M. E. Khan, "Logistic Regression",
+    [7] M. Jaggi, and M. E. Khan, "Logistic Regression",
         Machine Learning (CS-433), pp. 16-17, October XX, 2021.
 
     Usage
@@ -549,7 +686,7 @@ def reg_logistic_regression(y, tX, lambda_, w_init, max_iters=100, gamma=0.1):
     N = len(y)
 
     # Converting potentially 1D arrays to 2D arrays
-    w = w_init.reshape((len(w_init), 1))
+    w = initial_w.reshape((len(initial_w), 1))
     y = y.reshape((N, 1))
 
     # Checking if 'tX' is a 1D array, and consequently converting to a 2D array
@@ -572,7 +709,7 @@ def reg_logistic_regression(y, tX, lambda_, w_init, max_iters=100, gamma=0.1):
         # Calculating "penalty"-term from regularization
         penalty = lambda_ * w
 
-        # Updating weights with scaled negative gradient and penalty term [5]
+        # Updating weights with scaled negative gradient and penalty term [7]
         w = w - gamma * (grad + penalty)
 
     # Computing loss for the weights of the final iteration
