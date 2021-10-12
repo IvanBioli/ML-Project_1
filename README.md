@@ -9,7 +9,7 @@ TODO.
 
 07.10.2021 - All functions implemented ✔
 
-14.10.2021 - Optimized regressor (Also: Feature engineering, crossvalidation)
+14.10.2021 - Optimized regressor (Also: Find ideal parameters, feature engineering, crossvalidation)
 
 21.10.2021 - First draft of report
 
