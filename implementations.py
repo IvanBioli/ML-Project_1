@@ -5,7 +5,7 @@ Implementations
 
 Collection of functions developed for the machine learning project 1.
 
-The function descriptions were heavily inspired by the sklearn package.
+The function descriptions were heavily inspired by the numpy package.
 
 """
 
@@ -310,7 +310,9 @@ def least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1, tol=None):
     >>> tX = np.array([1, 2, 3, 4])
     >>> y = 3*tX
     >>> initial_w = np.array([1])
-    >>> w, loss = least_squares_GD(y, tX, initial_w)
+    >>> max_iters = 100
+    >>> gamma=0.1
+    >>> w, loss = least_squares_GD(y, tX, initial_w, max_iters, gamma)
     >>> print(w, loss)
     [3.] 0.0
 
@@ -320,13 +322,13 @@ def least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1, tol=None):
     N = len(y)
 
     # Converting 1D arrays to 2D arrays
-    w = initial_w.reshape((len(initial_w), 1))
-    y = y.reshape((N, 1))
+    w = initial_w.reshape((-1, 1))
+    y = y.reshape((-1, 1))
 
     # Checking if 'tX' is a 1D array, and consequently converting to a 2D array
     if len(tX.shape) == 1:
 
-        tX = tX.reshape((N, 1))
+        tX = tX.reshape((-1, 1))
 
     for iter in range(max_iters):
 
@@ -351,7 +353,7 @@ def least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1, tol=None):
     loss = np.mean(e**2) / 2
 
     # Converting weights back to 1D arrays
-    w = w.reshape(len(w))
+    w = w.reshape(-1)
 
     return w, loss
 
@@ -475,12 +477,12 @@ def least_squares(y, tX):
     N = len(y)
 
     # Converting a potential 1D array to a 2D array
-    y = y.reshape((N, 1))
+    y = y.reshape((-1, 1))
 
     # Checking if 'tX' is a 1D array, and consequently converting to a 2D array
     if len(tX.shape) == 1:
 
-        tX = tX.reshape((N, 1))
+        tX = tX.reshape((-1, 1))
 
     # Solving for the exact weights according to the normal equations in [4]
     w = np.linalg.solve(np.dot(tX.T, tX), np.dot(tX.T, y))
@@ -489,7 +491,7 @@ def least_squares(y, tX):
     loss = compute_loss_mse(y, tX, w)
 
     # Converting weights back to 1D arrays
-    w = w.reshape(len(w))
+    w = w.reshape(-1)
 
     return w, loss
 
@@ -535,12 +537,12 @@ def ridge_regression(y, tX, lambda_=0.1):
     N = len(y)
 
     # Converting a potential 1D array to a 2D array
-    y = y.reshape((N, 1))
+    y = y.reshape((-1, 1))
 
     # Checking if 'tX' is a 1D array, and consequently converting to a 2D array
     if len(tX.shape) == 1:
 
-        tX = tX.reshape((N, 1))
+        tX = tX.reshape((-1, 1))
 
     # Creating "penalty"-term for the normal equations
     penalty = lambda_ * 2 * N * np.identity(tX.shape[1])
@@ -552,7 +554,7 @@ def ridge_regression(y, tX, lambda_=0.1):
     loss = compute_loss_mse(y, tX, w)
 
     # Converting weights back to 1D arrays
-    w = w.reshape(len(w))
+    w = w.reshape(-1)
 
     return w, loss
 
@@ -601,21 +603,27 @@ def logistic_regression(y, tX, initial_w, max_iters=100, gamma=0.1):
 
     Usage
     -----
-    TODO
-
+    >>> tX = np.array([[9, 2, 7, 3, 1, 8], [2, 6, 1, 8, 1, 7]]).T
+    >>> y = np.array([-1, 1, -1, 1, 1, -1])
+    >>> initial_w = np.array([1, 1])
+    >>> max_iters = 100
+    >>> gamma = 0.1
+    >>> w, loss = logistic_regression(y, tX, initial_w, max_iters, gamma)
+    >>> print(w, loss)
+    [80.99691744 34.33026196] -276.3102111592855
     """
 
     # Number of samples
     N = len(y)
 
     # Converting potentially 1D arrays to 2D arrays
-    w = initial_w.reshape((len(initial_w), 1))
-    y = y.reshape((N, 1))
+    w = initial_w.reshape((-1, 1))
+    y = y.reshape((-1, 1))
 
     # Checking if 'tX' is a 1D array, and consequently converting to a 2D array
     if len(tX.shape) == 1:
 
-        tX = tX.reshape((N, 1))
+        tX = tX.reshape((-1, 1))
 
     # Defining overflow-guards for np.exp() and np.log() (see Notes above)
     exp_guard = lambda x : np.clip(x, -709, 709)
@@ -636,11 +644,11 @@ def logistic_regression(y, tX, initial_w, max_iters=100, gamma=0.1):
     sigma = 1 / (1 + np.exp( - exp_guard(np.dot(tX, w))))
 
     # Computing log-loss for the weights in the final iteration
-    loss = (np.dot(y.T, np.log(log_guard(sigma))) + 
+    loss = np.asscalar(np.dot(y.T, np.log(log_guard(sigma))) + 
         np.dot((1 - y).T, np.log(log_guard(1 - np.exp(exp_guard(sigma))))))
 
     # Converting weights back to 1D arrays
-    w = w.reshape(len(w))
+    w = w.reshape(-1)
 
     return w, loss
 
@@ -678,21 +686,28 @@ def reg_logistic_regression(y, tX, lambda_, initial_w, max_iters=100, gamma=0.1)
 
     Usage
     -----
-    TODO
-
+    >>> tX = np.array([[9, 2, 7, 3, 1, 8], [2, 6, 1, 8, 1, 7]]).T
+    >>> y = np.array([-1, 1, -1, 1, 1, -1])
+    >>> lambda_ = 0.1
+    >>> initial_w = np.array([1, 1])
+    >>> max_iters = 100
+    >>> gamma = 0.1
+    >>> w, loss = logistic_regression(y, tX, initial_w, max_iters, gamma)
+    >>> print(w, loss)
+    [80.99691744 34.33026196] -276.3102111592855
     """
 
     # Number of samples
     N = len(y)
 
     # Converting potentially 1D arrays to 2D arrays
-    w = initial_w.reshape((len(initial_w), 1))
-    y = y.reshape((N, 1))
+    w = initial_w.reshape((-1, 1))
+    y = y.reshape((-1, 1))
 
     # Checking if 'tX' is a 1D array, and consequently converting to a 2D array
     if len(tX.shape) == 1:
 
-        tX = tX.reshape((N, 1))
+        tX = tX.reshape((-1, 1))
 
     # Defining overflow-guards for np.exp() and np.log() (see Notes above)
     exp_guard = lambda x : np.clip(x, -709, 709)
@@ -716,10 +731,10 @@ def reg_logistic_regression(y, tX, lambda_, initial_w, max_iters=100, gamma=0.1)
     sigma = 1 / (1 + np.exp( - exp_guard(np.dot(tX, w))))
 
     # Computing log-loss for the weights in the final iteration
-    loss = (np.dot(y.T, np.log(log_guard(sigma))) + 
+    loss = np.asscalar(np.dot(y.T, np.log(log_guard(sigma))) + 
         np.dot((1 - y).T, np.log(log_guard(1 - np.exp(exp_guard(sigma))))))
 
     # Converting weights back to 1D arrays
-    w = w.reshape(len(w))
+    w = w.reshape(-1)
 
     return w, loss
