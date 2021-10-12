@@ -7,9 +7,9 @@ TODO.
 
 ## Schedule
 
-07.10.2021 - All functions implemented
+07.10.2021 - All functions implemented ✔
 
-14.10.2021 - Optimized regressor
+14.10.2021 - Optimized regressor (Also: Feature engineering, crossvalidation)
 
 21.10.2021 - First draft of report
 
@@ -88,7 +88,7 @@ ML_project1
   - [x] Write the source code
   - [x] Create documentation
   - [x] Include it in `run.py`
-  - [ ] Validate regressor
+  - [x] Validate regressor
   - [ ] Optimize regressor
 - [ ] Implement `reg_logistic_regression()` regressor
   - [x] Write the source code
@@ -98,8 +98,8 @@ ML_project1
   - [ ] Optimize regressor
 
 ### Handing in
-- [ ] Automate regressor calling in `run.py`
-- [ ] Maybe input hyperparameters with keyword arguments?
+- [x] Automate regressor calling in `run.py`
+- [x] Maybe input hyperparameters with keyword arguments?
 
 ### Competition
 - [x] Create a team
