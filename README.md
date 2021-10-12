@@ -19,7 +19,7 @@ TODO.
 
 ## Optimization ideas
 - [ ] Preprocessing
-  - [ ] Remove features that are not relevant
+  - [x] Remove features that are not relevant
   - [ ] Boost features that really matter
   - [ ] Check for values that are automatically set at some values (they might be outliers, but be careful because there could be outliers in the test dataset)
   - [ ] Do some research on preprocessing
