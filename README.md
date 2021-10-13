@@ -20,7 +20,13 @@ TODO.
 ## Optimization ideas
 - [ ] Preprocessing
   - [x] Remove features that are not relevant
+  - [ ] Features with a high number of undefined, try to:
+    - [ ] Replace with 0
+    - [ ] Replace with mean
+    - [ ] Replace with median
+    - [ ] Same as above adding a dummy variable 0/1 meaning feature or not feature
   - [ ] Boost features that really matter
+    - [ ] polynomials, try the best combinations between degree 0 and 5
   - [ ] Check for values that are automatically set at some values (they might be outliers, but be careful because there could be outliers in the test dataset)
   - [ ] Do some research on preprocessing
   - [ ] Understand which features affect most our predictions
@@ -109,6 +115,19 @@ ML_project1
 ### Report
 - [x] Create a layout
 - [ ] Create a structure
+  - [ ] Abstract
+  - [ ] Introduction
+  - [ ] Models and methods
+    - [ ] Summarize features
+    - [ ] Preprocessing
+    - [ ] Implementations
+    - [ ] Robustness, traning parameters, crossvalidation, data splitting ...
+  - [ ] Results
+    - [ ] Table to compare regressors
+  - [ ] Discussion
+  - [ ] (Summary)
+  - [ ] References
+
 - [ ] Write the report
 - [ ] Illustrate our results
 
