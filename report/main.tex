@@ -1,7 +1,6 @@
 \documentclass[11pt, a4paper, twocolumn]{article}
 
 \usepackage{style}
-\usepackage{blindtext} % Blindtext generator (to be removed later on)
 
 % Information for generating title
 \title{\bfseries Machine Learning: Project 1}
@@ -18,52 +17,82 @@
     \vspace{-1.5cm}
     \maketitle
     \begin{abstract}
-        \blindtext
+        Text for the abstract.
     \end{abstract}
     \vspace{0.75cm}
   \end{@twocolumnfalse}
 ]
 
-\section{First section}
-\label{sec:firstsection}
+\section{Introduction}
+\label{sec:introduction}
 
-\blindtext \cite{jaggi2021}
+What is the underlying problem, and what are we allowed/supposed to do (i.e.
+rules, guidelines, the 6 regressors, linear models).
 
-\begin{equation}
-    a^2 + b^2 = c^2
-    \label{eq:pythaoras}
-\end{equation}
+\section{Models and Methods}
+\label{sec:models}
 
-\blindtext 
+Summarize the data set (30 numerical features, binary label slightly skewed,
+250000 training samples and 750000 test samples?, outliers were replaced with
+-999).
+
+\subsection{Preprocessing}
+\label{subsec:preprocessing}
+
+Describe our approach to preprocessing (feature importances, outliers,
+standardization, polynomial basis).
+
+[Visualizations of feature preprocessing/importance]
+
+\subsection{Implementations}
+\label{subsec:implementations}
+
+Detail our way of implementing the regressors (robustness, converting 1D to 2D
+numpy arrays such that any numpy array can be passed, documentation with usage,
+encapsuled code within each function, stopping criterion where it makes sense).
+
+Hyperparameter tuning (crossvalidation, grid search for ideal parameters).
+
+[Maybe visualization of parameter grid search]
+
+Optimized regressor.
+
+\section{Results}
+\label{sec:results}
+
+Submitted predictions to AIcrowd.
 
 \begin{table}[h]
-    \caption{Test}
-    \label{tab:test}
+    \caption{Results of the regressors}
+    \label{tab:results}
     \centering
     \renewcommand{\arraystretch}{1.2}
     \begin{tabular}{@{}lcc@{}}
         \toprule
-        Name & Age & Height \\
+        Regressor & F1-score & Accuracy \\
         \midrule
-        Fabio & 23 & 181 \\
+        least\_squares\_GD & 0.665 & 0.712 \\
+        least\_squares\_SGD & 0.665 & 0.712 \\
+        least\_squares & 0.665 & 0.712 \\
+        ridge\_regression & 0.665 & 0.712 \\
+        logistic\_regression & 0.665 & 0.712 \\
+        reg\_logistic\_regression & 0.665 & 0.712 \\
+        optimized\_regressor & 0.665 & 0.712 \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-\blindtext 
+\section{Discussion}
+\label{sec:discussion}
 
-\begin{figure}[h]
-    \centering
-    \begin{tikzpicture}
-        \fill[color=darkblue] (-3, -0.5) rectangle (-2, 0.5);
-        \fill[color=normalblue] (-0.5, -0.5) rectangle (0.5, 0.5);
-        \fill[color=lightblue] (2, -0.5) rectangle (3, 0.5);
-    \end{tikzpicture}
-    \caption{Color scheme}
-    \label{fig:theme}
-\end{figure}
+Problems we encountered.
 
-\blindtext 
+Shortcomings of our regressors.
+
+\section{Summary}
+\label{sec:summary}
+
+(May not be necessary for such a short report).
 
 \bibliography{biblio.bib}
 
