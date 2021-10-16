@@ -64,7 +64,7 @@ def standardize(tX):
     return tX_std
 
 
-def polynomial_basis(tX, degrees, indices = np.arange(tX.shape[1]), std=False):
+def polynomial_basis(tX, degrees, indices=False, std=False):
     """
     Creates a polynomial basis from tX.
 
@@ -75,8 +75,9 @@ def polynomial_basis(tX, degrees, indices = np.arange(tX.shape[1]), std=False):
     degrees : list or int
         List (or int) with the polynomial degrees (or maximum polynomial degree)
         that should be used as basis elements.
-    indices : TODO
-    
+    indices : np.ndarray or False, default=False
+        Chose a subset of indices which should be boosted.
+
     std : bool, default=False
         Standardize features of each polynomial basis element.
 
@@ -102,13 +103,18 @@ def polynomial_basis(tX, degrees, indices = np.arange(tX.shape[1]), std=False):
      [ 1.  3.  9.]
      [ 1.  4. 16.]]
 
-    >>> ttX = np.arange(10).reshape((2, 5))
+    >>> tX = np.arange(10).reshape((2, 5))
     >>> tX_poly = polynomial_basis(tX, 2, [1, 2])
     >>> print(tX_poly)
     [[ 1.  0.  1.  2.  3.  4.  1.  4.]
     [ 1.  5.  6.  7.  8.  9. 36. 49.]]
 
     """
+
+    # If no indices are selected, use all indices
+    if not indices:
+
+        indices = np.arange(tX.shape[1])
 
     # Checking if integer was passed as 'degrees', and converting it to a list
     if isinstance(degrees, int):
@@ -134,11 +140,11 @@ def polynomial_basis(tX, degrees, indices = np.arange(tX.shape[1]), std=False):
         elif deg > 1:
 
             if std:
-
+                
                 tX_poly = np.column_stack((tX_poly, standardize(tX[:, indices]**deg)))
 
             else:
-
+                
                 tX_poly = np.column_stack((tX_poly, tX[:, indices]**deg))
 
     return tX_poly
