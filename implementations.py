@@ -345,7 +345,7 @@ def least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1, tol=None):
 
         tX = tX.reshape((-1, 1))
 
-    for iter in range(max_iters):
+    for _ in range(max_iters):
 
         # Error vector
         e = y - np.dot(tX, w)
@@ -628,9 +628,6 @@ def logistic_regression(y, tX, initial_w, max_iters=100, gamma=0.1):
     [80.99691744 34.33026196] -276.3102111592855
     """
 
-    # Number of samples
-    N = len(y)
-
     # Converting potentially 1D arrays to 2D arrays
     w = initial_w.reshape((-1, 1))
     y = y.reshape((-1, 1))
@@ -644,13 +641,13 @@ def logistic_regression(y, tX, initial_w, max_iters=100, gamma=0.1):
     exp_guard = lambda x : np.clip(x, -709, 709)
     log_guard = lambda x : np.maximum(x, 1e-20)
  
-    for iter in range(max_iters):
+    for _ in range(max_iters):
 
         # Evaluating the sigmoid function
-        sigma = 1 / (1 + np.exp( - exp_guard(np.dot(tX, w))))
+        sigma = 1.0 / (1 + np.exp( - exp_guard(np.dot(tX, w))))
 
         # Gradient for MSE loss
-        grad = - np.dot(tX.T, sigma - y) / N
+        grad = np.dot(tX.T, sigma - y)
 
         # Updating weights with scaled negative gradient
         w = w - gamma * grad
@@ -659,8 +656,8 @@ def logistic_regression(y, tX, initial_w, max_iters=100, gamma=0.1):
     sigma = 1 / (1 + np.exp( - exp_guard(np.dot(tX, w))))
 
     # Computing log-loss for the weights in the final iteration
-    loss = np.asscalar(np.dot(y.T, np.log(log_guard(sigma))) + 
-        np.dot((1 - y).T, np.log(log_guard(1 - np.exp(exp_guard(sigma))))))
+    loss = np.asscalar(- np.dot(y.T, np.log(log_guard(sigma))) -
+                         np.dot((1-y).T, np.log(log_guard(1 - sigma))))
 
     # Converting weights back to 1D arrays
     w = w.reshape(-1)
@@ -712,9 +709,6 @@ def reg_logistic_regression(y, tX, lambda_, initial_w, max_iters=100, gamma=0.1)
     [80.99691744 34.33026196] -276.3102111592855
     """
 
-    # Number of samples
-    N = len(y)
-
     # Converting potentially 1D arrays to 2D arrays
     w = initial_w.reshape((-1, 1))
     y = y.reshape((-1, 1))
@@ -728,13 +722,13 @@ def reg_logistic_regression(y, tX, lambda_, initial_w, max_iters=100, gamma=0.1)
     exp_guard = lambda x : np.clip(x, -709, 709)
     log_guard = lambda x : np.maximum(x, 1e-20)
  
-    for iter in range(max_iters):
+    for _ in range(max_iters):
 
         # Evaluating the sigmoid function
         sigma = 1 / (1 + np.exp( - exp_guard(np.dot(tX, w))))
 
         # Gradient for MSE loss
-        grad = - np.dot(tX.T, sigma - y) / N
+        grad = - np.dot(tX.T, sigma - y)
 
         # Calculating "penalty"-term from regularization
         penalty = lambda_ * w
@@ -746,8 +740,9 @@ def reg_logistic_regression(y, tX, lambda_, initial_w, max_iters=100, gamma=0.1)
     sigma = 1 / (1 + np.exp( - exp_guard(np.dot(tX, w))))
 
     # Computing log-loss for the weights in the final iteration
-    loss = np.asscalar(np.dot(y.T, np.log(log_guard(sigma))) + 
-        np.dot((1 - y).T, np.log(log_guard(1 - np.exp(exp_guard(sigma))))))
+    loss = np.asscalar(- np.dot(y.T, np.log(log_guard(sigma))) -
+                         np.dot((1-y).T, np.log(log_guard(1 - sigma))) +
+                         lambda_ / 2 * np.dot(w.T, w))
 
     # Converting weights back to 1D arrays
     w = w.reshape(-1)

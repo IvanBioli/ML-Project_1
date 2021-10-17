@@ -23,24 +23,16 @@ _, tX_test, ids_test = load_csv_data('data/test.csv')
 tX_test = standardize(tX_test)
 
 # Derived data sets
-tX_test_p123 = polynomial_basis(tX_test, [1, 2, 3], std=True)
-tX_train_p123 = polynomial_basis(tX_train, [1, 2, 3], std=True)
-tX_test_p123456 = polynomial_basis(tX_test, [1, 2, 3, 4, 5, 6], std=True)
-tX_train_p123456 = polynomial_basis(tX_train, [1, 2, 3, 4, 5, 6], std=True)
+tX_test_p1234 = polynomial_basis(tX_test, [1, 2, 3, 4, 5, 6, 7, 8], std=True)
+tX_train_p1234 = polynomial_basis(tX_train, [1, 2, 3, 4, 5, 6, 7, 8], std=True)
 
 
 # Experiment configuration
-regressors = ['least_squares_GD',
-              'least_squares',
-              'ridge_regression']
+regressors = ['ridge_regression']
 
-sets = [{'tX_train' : tX_train_p123, 'tX_test' : tX_test_p123},
-        {'tX_train' : tX_train_p123456, 'tX_test' : tX_test_p123456},
-        {'tX_train' : tX_train_p123456, 'tX_test' : tX_test_p123456}]
+sets = [{'tX_train' : tX_train_p1234, 'tX_test' : tX_test_p1234}]
 
-params = [{'initial_w': np.ones(tX_train_p123.shape[1]), 'max_iters': 2000, 'gamma': 0.04},
-          {},
-          {'lambda_': 1e-1}]
+params = [{'lambda_': 1e-3}]
 
 """
 # Final experiment configurations
