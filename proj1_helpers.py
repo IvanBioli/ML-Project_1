@@ -27,16 +27,19 @@ def load_csv_data(data_path, sub_sample=False):
 def predict_labels(weights, data):
     """Generates class predictions given weights, and a test data matrix"""    
     y_pred = np.dot(data, weights)
-
+    
     ### Maintaining the prediction ratio
-    ratio = 0.657332
     thresh = 0
+    """
+    step = 0.01
+    ratio = 0.657332
+    
     N = y_pred.shape[0]
     while (sum(y_pred <= thresh) < N*ratio):
 
-        thresh += 0.01
+        thresh += step
+    """
     ###
-
     y_pred[np.where(y_pred <= thresh)] = -1
     y_pred[np.where(y_pred > thresh)] = 1
     
