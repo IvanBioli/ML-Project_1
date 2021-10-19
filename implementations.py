@@ -194,7 +194,7 @@ def compute_loss_mae(y, tX, w):
     return loss
 
 
-def least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1, tol=None):
+def least_squares_GD(y, tX, initial_w=None, max_iters=100, gamma=0.1, tol=None):
     """
     Gradient descent algorithm for linear regression with mean square error (MSE) loss.
 
@@ -204,7 +204,7 @@ def least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1, tol=None):
         Vector with the labels.
     tX : np.ndarray
         Array with the samples as rows and the features as columns.
-    initial_w : np.ndarray
+    initial_w : np.ndarray or None, default=None
         Vector with initial weights to start the iteration from.
     max_iters : int, default=100
         Maximum number of iterations.
@@ -230,20 +230,22 @@ def least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1, tol=None):
     -----
     >>> tX = np.array([1, 2, 3, 4])
     >>> y = 3*tX
-    >>> initial_w = np.array([1])
-    >>> max_iters = 100
-    >>> gamma=0.1
-    >>> w, loss = least_squares_GD(y, tX, initial_w, max_iters, gamma)
+    >>> w, loss = least_squares_GD(y, tX)
     >>> print(w, loss)
     [3.] 0.0
     """
 
+    if len(tX.shape) == 1: # Checking if 'tX' is a 1D array
+        tX = tX.reshape((-1, 1)) # consequently converting to a 2D array
+
+    # Zero vector for 'initial_w' if no initial value was specified
+    if initial_w == None:
+        initial_w = np.zeros(tX.shape[1])
+    
     # Converting 1D arrays to 2D arrays
     w = initial_w.reshape((-1, 1))
     y = y.reshape((-1, 1))
 
-    if len(tX.shape) == 1: # Checking if 'tX' is a 1D array
-        tX = tX.reshape((-1, 1)) # consequently converting to a 2D array
     for _ in range(max_iters):
         e = y - np.dot(tX, w) # Error vector
         grad = - np.dot(tX.T, e) / len(y) # Gradient for MSE loss
@@ -259,7 +261,7 @@ def least_squares_GD(y, tX, initial_w, max_iters=100, gamma=0.1, tol=None):
     return w, loss
 
 
-def least_squares_SGD(y, tX, initial_w, max_iters=100000, gamma=0.1, seed=None):
+def least_squares_SGD(y, tX, initial_w=None, max_iters=100000, gamma=0.1, seed=None):
     """
     Stochastic gradient descent algorithm for mean square error (MSE) loss.
 
@@ -269,7 +271,7 @@ def least_squares_SGD(y, tX, initial_w, max_iters=100000, gamma=0.1, seed=None):
         Vector with the labels.
     tX : np.ndarray
         Array with the samples as rows and the features as columns.
-    initial_w : np.ndarray
+    initial_w : np.ndarray or None, default=None
         Vector with initial weights to start the iteration from.
     max_iters : int, default=100000
         Maximum number of iterations.
@@ -294,17 +296,22 @@ def least_squares_SGD(y, tX, initial_w, max_iters=100000, gamma=0.1, seed=None):
     -----
     >>> tX = np.array([1, 2, 3, 4])
     >>> y = 3*tX
-    >>> initial_w = np.array([1])
-    >>> w, loss = least_squares_SGD(y, tX, initial_w)
+    >>> w, loss = least_squares_SGD(y, tX)
     >>> print(w, loss)
-    [3.] 0.0
+    [3.] 9.121204216617949e-31
 
     """
 
-    # TODO: Robustness measures for 1d tX matrices
+    if len(tX.shape) == 1: # Checking if 'tX' is a 1D array
+        tX = tX.reshape((-1, 1)) # consequently converting to a 2D array
 
+    # Zero vector for 'initial_w' if no initial value was specified
+    if initial_w == None:
+        initial_w = np.zeros(tX.shape[1])
+    
     # Converting 1D arrays to 2D arrays
-    w = initial_w
+    w = initial_w.reshape((-1, 1))
+    y = y.reshape((-1, 1))
 
     # Using the desired seed (if specified)
     if seed != None:
@@ -324,6 +331,7 @@ def least_squares_SGD(y, tX, initial_w, max_iters=100000, gamma=0.1, seed=None):
     # Computing loss (MSE) for the weights in the final iteration
     e = y - np.dot(tX, w)
     loss = np.mean(np.power(e, 2)) / 2
+    w = w.reshape(-1) # Converting weights back to 1D arrays
     return w, loss
 
 
@@ -399,8 +407,7 @@ def ridge_regression(y, tX, lambda_=0.1):
     -----
     >>> tX = np.array([1, 2, 3, 4])
     >>> y = 3*tX
-    >>> lambda_ = 0.1
-    >>> w, loss = ridge_regression(y, tX, lambda_)
+    >>> w, loss = ridge_regression(y, tX)
     >>> print(w, loss)
     [2.92207792] 0.02276943835385406
     """
@@ -417,7 +424,7 @@ def ridge_regression(y, tX, lambda_=0.1):
     return w, loss
 
 
-def logistic_regression(y, tX, initial_w, max_iters=100, gamma=0.1):
+def logistic_regression(y, tX, initial_w=None, max_iters=100, gamma=0.1):
     """
     Gradient descent regressor with logistic loss function.
 
@@ -427,7 +434,7 @@ def logistic_regression(y, tX, initial_w, max_iters=100, gamma=0.1):
         Vector with the labels.
     tX : np.ndarray
         Array with the samples as rows and the features as columns.
-    initial_w : np.ndarray
+    initial_w : np.ndarray or None, default=None
         Vector with initial weights to start the iteration from.
     max_iters : int, default=100
         Maximum number of iterations.
@@ -463,18 +470,20 @@ def logistic_regression(y, tX, initial_w, max_iters=100, gamma=0.1):
     -----
     >>> tX = np.array([[9, 2, 7, 3, 1, 8], [2, 6, 1, 8, 1, 7]]).T
     >>> y = np.array([-1, 1, -1, 1, 1, -1])
-    >>> initial_w = np.array([1, 1])
-    >>> max_iters = 100
-    >>> gamma = 0.1
-    >>> w, loss = logistic_regression(y, tX, initial_w, max_iters, gamma)
+    >>> w, loss = logistic_regression(y, tX)
     >>> print(w, loss)
-    [80.99691744 34.33026196] -276.3102111592855
+    [-181.50236696   48.74761968] -0.0
     """
-    # Converting potentially 1D arrays to 2D arrays
+    if len(tX.shape) == 1: # Checking if 'tX' is a 1D array
+        tX = tX.reshape((-1, 1)) # consequently converting to a 2D array
+
+    # Zero vector for 'initial_w' if no initial value was specified
+    if initial_w == None:
+        initial_w = np.zeros(tX.shape[1])
+    
+    # Converting 1D arrays to 2D arrays
     w = initial_w.reshape((-1, 1))
     y = y.reshape((-1, 1))
-    if len(tX.shape) == 1: # Checking if 'tX' is a 1D array
-        tX = tX.reshape((-1, 1)) #converting to a 2D array
 
     # Defining overflow-guards for np.exp() and np.log() (see Notes above)
     exp_guard = lambda x : np.clip(x, -709, 709)
@@ -493,7 +502,7 @@ def logistic_regression(y, tX, initial_w, max_iters=100, gamma=0.1):
     return w, loss
 
 
-def reg_logistic_regression(y, tX, lambda_, initial_w, max_iters=100, gamma=0.1):
+def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, gamma=0.1):
     """
     Gradient descent regressor with (ridge) regularized logistic loss function.
 
@@ -503,9 +512,9 @@ def reg_logistic_regression(y, tX, lambda_, initial_w, max_iters=100, gamma=0.1)
         Vector with the labels.
     tX : np.ndarray
         Array with the samples as rows and the features as columns.
-    lambda_ : float
+    lambda_ : float, default=0.1
         Regularization parameter.
-    initial_w : np.ndarray
+    initial_w : np.ndarray or None, default=None
         Vector with initial weights to start the iteration from.
     max_iters : int, default=100
         Maximum number of iterations.
@@ -528,22 +537,21 @@ def reg_logistic_regression(y, tX, lambda_, initial_w, max_iters=100, gamma=0.1)
     -----
     >>> tX = np.array([[9, 2, 7, 3, 1, 8], [2, 6, 1, 8, 1, 7]]).T
     >>> y = np.array([-1, 1, -1, 1, 1, -1])
-    >>> lambda_ = 0.1
-    >>> initial_w = np.array([1, 1])
-    >>> max_iters = 100
-    >>> gamma = 0.1
-    >>> w, loss = logistic_regression(y, tX, initial_w, max_iters, gamma)
+    >>> w, loss = reg_logistic_regression(y, tX)
     >>> print(w, loss)
-    [80.99691744 34.33026196] -276.3102111592855
+    [303.7492403  126.33072599] 5687.462876798688
     """
-    # Converting potentially 1D arrays to 2D arrays
+
+    if len(tX.shape) == 1: # Checking if 'tX' is a 1D array
+        tX = tX.reshape((-1, 1)) # consequently converting to a 2D array
+
+    # Zero vector for 'initial_w' if no initial value was specified
+    if initial_w == None:
+        initial_w = np.zeros(tX.shape[1])
+    
+    # Converting 1D arrays to 2D arrays
     w = initial_w.reshape((-1, 1))
     y = y.reshape((-1, 1))
-
-    # Checking if 'tX' is a 1D array, and consequently converting to a 2D array
-    if len(tX.shape) == 1:
-        tX = tX.reshape((-1, 1))
-
     # Defining overflow-guards for np.exp() and np.log() (see Notes above)
     exp_guard = lambda x : np.clip(x, -709, 709)
     log_guard = lambda x : np.maximum(x, 1e-20)
