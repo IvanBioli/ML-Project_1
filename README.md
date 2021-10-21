@@ -4,14 +4,14 @@
 
 
 ## 📝 Table of Contents
-- [🧐 About]
-- [⛏️ Run project]
-- [🔁 Reproduce results]
-- [🔍 Technical details]
-- [📐 Architecture]
-- [📂 File structure]
-- [📚 References]
-- [✍️ Authors]
+- [🧐 About](#️-about)
+- [⛏️ Run project](#️-run-project)
+- [🔁 Reproduce results](#️-reproduce-results)
+- [🔍 Technical details](#️-technical-details)
+- [📐 Architecture](#️-architecture)
+- [📂 File structure](#️-file-structure)
+- [📚 References](#️-references)
+- [✍️ Authors](#️-authors)
 
 ## 🧐 About
 Short intro
