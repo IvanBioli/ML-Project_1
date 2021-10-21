@@ -563,3 +563,82 @@ def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, g
                          lambda_ / 2 * np.dot(w.T, w))
     w = w.reshape(-1) # Converting weights back to 1D arrays
     return w, loss
+
+def lasso_SD(y, tX, initial_w, max_iters=1000, gamma=0.1, lambda_ = 0.1, threshold=None):
+    """
+    Lasso Subgradient Descent regressor with MSE loss function.
+
+    Parameters
+    ----------
+    y : np.ndarray
+        Vector with the labels.
+    tX : np.ndarray
+        Array with the samples as rows and the features as columns.
+    initial_w : np.ndarray or None, default=None
+        Vector with initial weights to start the iteration from.
+    max_iters : int, default=1000
+        Maximum number of iterations.
+    gamma : float, default=0.1
+        Scaling factor for the subgradient subtraction.
+    lambda_ : float, defalut=0.1
+        Regularization parameter.
+    threshold: float, default=None
+        Threshold under which the weight entries are set to zero in order to have sparsity.
+        
+    Returns
+    -------
+    w : np.ndarray
+        Vector containing the final weights.
+    loss : float
+        Mean square error loss function evaluated with the final weights.
+
+    References
+    ----------
+    [1] M. Jaggi, and M. E. Khan, "Optimization", Machine Learning (CS-433),
+        pp. 6-7, September 23, 2021.
+
+    Usage
+    -----
+    >>> tX = np.random.rand(1000, 10)
+    >>> y = np.random.rand(1000, 1)
+    >>> initial_w = np.ones(tX.shape[1] , dtype=float)
+    >>> w, loss = lasso_SD(y, tX, initial_w)
+    >>> print(w, loss)
+    [0.09219308 0.08941125 0.08259039 0.10009369 0.11471479 0.10400056
+    0.11830658 0.05418399 0.06966045 0.10933284] 0.043595101687066144
+    """
+    # Number of samples
+    N = len(y)
+
+    # Converting 1D arrays to 2D arrays
+    w = initial_w.reshape((len(initial_w), 1))
+    y = y.reshape((N, 1))
+
+    # Checking if 'tX' is a 1D array, and consequently converting to a 2D array
+    if len(tX.shape) == 1:
+
+        tX = tX.reshape((N, 1))
+
+    for iter in range(max_iters):
+
+        # Error vector
+        e = y - np.dot(tX, w)
+
+        # Subgradient for the Lasso loss function
+        subgrad = - np.dot(tX.T, e) / N + lambda_ / np.sqrt(1 + iter) * np.sign(w)
+
+        # Updating weights with negative gradient scaled by 'gamma'
+        w = w - gamma * subgrad
+
+
+    # Computing loss (MSE) for the weights in the final iteration
+    loss = np.mean(e**2) / 2
+
+    # Converting weights back to 1D arrays
+    w = w.reshape(len(w))
+
+    # Setting to zero all the entries of w under the threshold in absolute value
+    if (threshold != None):
+        w[np.absolute(w) < threshold] = 0
+
+    return w, loss
