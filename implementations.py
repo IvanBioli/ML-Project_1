@@ -44,7 +44,7 @@ def standardize(tX):
         tX_std = (tX - feature_mean) / feature_std
     else:
         tX_std = tX - feature_mean
-        feature_std[zero_ind] = 1 # Leaving features with zero variance unchanged
+        feature_std[zero_ind] = 1 # Leaving zero-variance features unchanged
         tX_std /= feature_std
         print("WARNING: Zero variance feature encountered.")
         print("         Only standardized this one with the feature-mean.")
@@ -100,7 +100,7 @@ def polynomial_basis(tX, degrees, indices=False, std=False):
 
     if not indices: # If no indices are selected, use all indices
         indices = np.arange(tX.shape[1])
-    if isinstance(degrees, int): # Checking if integer was passed as 'degrees', and converting it to a list
+    if isinstance(degrees, int): # Checking if a maximum degree (int) was passed
         degrees = range(degrees + 1)
     # Always including the original features (degree 1) as a basis-element
     if std:
@@ -108,7 +108,7 @@ def polynomial_basis(tX, degrees, indices=False, std=False):
     else:
         tX_poly = tX
     for deg in degrees:
-        if deg == 0: # Treating degree zero separately to avoid duplicated columns
+        if deg == 0: # Degree zero treated separately to avoid column-duplicates
             tX_poly = np.column_stack((np.ones(tX.shape[0]), tX_poly))
         elif deg > 1:
             if std:
@@ -151,7 +151,7 @@ def compute_loss_mse(y, tX, w):
     10.25
 
     """
-    e = y - np.dot(tX, w)
+    e = y - np.dot(tX, w.reshape((-1, 1)))
     loss = 1/2 * np.mean(np.power(e, 2))
     return loss
 
@@ -189,14 +189,14 @@ def compute_loss_mae(y, tX, w):
     4.5
 
     """
-    e = y - np.dot(tX, w)
+    e = y - np.dot(tX, w.reshape((-1, 1)))
     loss = np.mean(np.abs(e))
     return loss
 
 
 def least_squares_GD(y, tX, initial_w=None, max_iters=100, gamma=0.1, tol=None):
     """
-    Gradient descent algorithm for linear regression with mean square error (MSE) loss.
+    Gradient descent algorithm for linear regression with MSE loss.
 
     Parameters
     ----------
@@ -223,8 +223,8 @@ def least_squares_GD(y, tX, initial_w=None, max_iters=100, gamma=0.1, tol=None):
 
     References
     ----------
-    [1] M. Jaggi, and M. E. Khan, "Optimization", Machine Learning (CS-433),
-        pp. 6-7, September 23, 2021.
+    [1] M. Jaggi, R. Urbanke, and M. E. Khan, "Optimization",
+        Machine Learning (CS-433), pp. 6-7, September 23, 2021.
 
     Usage
     -----
@@ -239,7 +239,7 @@ def least_squares_GD(y, tX, initial_w=None, max_iters=100, gamma=0.1, tol=None):
         tX = tX.reshape((-1, 1)) # consequently converting to a 2D array
 
     # Zero vector for 'initial_w' if no initial value was specified
-    if initial_w == None:
+    if initial_w is None:
         initial_w = np.zeros(tX.shape[1])
     
     # Converting 1D arrays to 2D arrays
@@ -249,13 +249,13 @@ def least_squares_GD(y, tX, initial_w=None, max_iters=100, gamma=0.1, tol=None):
     for _ in range(max_iters):
         e = y - np.dot(tX, w) # Error vector
         grad = - np.dot(tX.T, e) / len(y) # Gradient for MSE loss
-        w = w - gamma * grad # Updating weights with negative gradient scaled by 'gamma'
+        w = w - gamma * grad # Updating with scaled negative gradient
         # Stopping criterion
         if (tol != None):
             if (np.linalg.norm(grad) < tol):
                 print("NOTE: Stopping criterion met in iteration ", iter, ".")
                 break
-    loss = np.mean(np.power(e, 2)) / 2 # Computing loss (MSE) for the weights in the final iteration
+    loss = np.mean(np.power(e, 2)) / 2 # Computing loss (MSE)
     w = w.reshape(-1) # Converting weights back to 1D arrays
 
     return w, loss
@@ -289,8 +289,8 @@ def least_squares_SGD(y, tX, initial_w=None, max_iters=100000, gamma=0.1, seed=N
 
     References
     ----------
-    [3] M. Jaggi, and M. E. Khan, "Optimization", Machine Learning (CS-433),
-        pp. 8-10, September 23, 2021.
+    [3] M. Jaggi, R. Urbanke, and M. E. Khan, "Optimization",
+        Machine Learning (CS-433), pp. 8-10, September 23, 2021.
 
     Usage
     -----
@@ -302,21 +302,13 @@ def least_squares_SGD(y, tX, initial_w=None, max_iters=100000, gamma=0.1, seed=N
 
     """
 
-    if len(tX.shape) == 1: # Checking if 'tX' is a 1D array
-        tX = tX.reshape((-1, 1)) # consequently converting to a 2D array
 
-    # Zero vector for 'initial_w' if no initial value was specified
-    if initial_w == None:
-        initial_w = np.zeros(tX.shape[1])
-    
-    # Converting 1D arrays to 2D arrays
-    w = initial_w.reshape((-1, 1))
-    y = y.reshape((-1, 1))
+    if initial_w is None: # Zero vector for 'initial_w' if none was specified
+        w = np.zeros(tX.shape[1])
 
-    # Using the desired seed (if specified)
-    if seed != None:
+    if seed is not None: # Using the desired seed (if one is specified)
         np.random.seed(seed)
-    rand_ind = np.random.choice(np.arange(len(y)), max_iters) # Sampling random sequence of indices (with replacement)
+    rand_ind = np.random.choice(np.arange(len(y)), max_iters) # Random indices
 
     for iter in range(max_iters):
         # Picking a random sample
@@ -324,14 +316,13 @@ def least_squares_SGD(y, tX, initial_w=None, max_iters=100000, gamma=0.1, seed=N
         tX_rand = tX[rand_ind[iter]]
         e_rand = y_rand - np.inner(tX_rand, w) # Random error
         grad_rand = - e_rand * tX_rand / len(y) # Random gradient for MSE loss
-        w = w - gamma * grad_rand # Updating weights with negative gradient scaled by 'gamma'
+        w = w - gamma * grad_rand # Updating with scaled negative gradient
         
         # TODO: find a way to stop the algorithm efficiently
 
     # Computing loss (MSE) for the weights in the final iteration
     e = y - np.dot(tX, w)
     loss = np.mean(np.power(e, 2)) / 2
-    w = w.reshape(-1) # Converting weights back to 1D arrays
     return w, loss
 
 
@@ -355,8 +346,8 @@ def least_squares(y, tX):
 
     References
     ----------
-    [4] M. Jaggi, and M. E. Khan, "Least Squares", Machine Learning (CS-433),
-        p. 7, October 5, 2021.
+    [4] M. Jaggi, R.Urbanke, and M. E. Khan, "Least Squares",
+        Machine Learning (CS-433), p. 7, October 5, 2021.
 
     Usage
     -----
@@ -371,7 +362,7 @@ def least_squares(y, tX):
     y = y.reshape((-1, 1)) # Converting a potential 1D array to a 2D array
     if len(tX.shape) == 1: # Checking if 'tX' is a 1D array
         tX = tX.reshape((-1, 1)) # consequently converting to a 2D array
-    w = np.linalg.solve(np.dot(tX.T, tX), np.dot(tX.T, y)) # Solving for the exact weights according to the normal equations in [4]
+    w = np.linalg.solve(np.dot(tX.T, tX), np.dot(tX.T, y)) # Solving for w [4]
     loss = compute_loss_mse(y, tX, w) # Computing loss (MSE)
     w = w.reshape(-1) # Converting weights back to 1D arrays
     return w, loss
@@ -400,12 +391,13 @@ def ridge_regression(y, tX, lambda_=0.1):
 
     References
     ----------
-    [5] M. Jaggi, and M. E. Khan, "Regularization: Ridge Regression and Lasso",
-        Machine Learning (CS-433), p. 3, October 1, 2021.
+    [5] M. Jaggi, R. Urbanke, and M. E. Khan, "Regularization: Ridge Regression
+        and Lasso", Machine Learning (CS-433), p. 3, October 7, 2021.
 
     Usage
     -----
-    >>> tX = np.array([1, 2, 3, 4])
+    >>> tX = np.array([[9, 2, 7, 3, 1, 8],
+                       [2, 6, 1, 8, 1, 7]]).T
     >>> y = 3*tX
     >>> w, loss = ridge_regression(y, tX)
     >>> print(w, loss)
@@ -415,7 +407,7 @@ def ridge_regression(y, tX, lambda_=0.1):
     y = y.reshape((-1, 1)) # Converting a potential 1D array to a 2D array
     if len(tX.shape) == 1: # Checking if 'tX' is a 1D array
         tX = tX.reshape((-1, 1)) # consequently converting to a 2D array
-    penalty = lambda_ * 2 * len(y) * np.identity(tX.shape[1]) # Creating "penalty"-term for the normal equations
+    penalty = lambda_ * 2 * len(y) * np.identity(tX.shape[1]) # "Penalty"-term
 
     # Solving for the exact weights according to the normal equations in [5]
     w = np.linalg.solve(np.dot(tX.T, tX) + penalty, np.dot(tX.T, y))
@@ -450,8 +442,8 @@ def logistic_regression(y, tX, initial_w=None, max_iters=100, gamma=0.1):
 
     References
     ----------
-    [6] M. Jaggi, and M. E. Khan, "Logistic Regression",
-        Machine Learning (CS-433), pp. 2-12, October XX, 2021.
+    [6] N. Flammarion, R. Urbanke, and M. E. Khan, "Logistic Regression",
+        Machine Learning (CS-433), pp. 2-12, October 21, 2021.
 
     Notes
     -----
@@ -468,7 +460,8 @@ def logistic_regression(y, tX, initial_w=None, max_iters=100, gamma=0.1):
 
     Usage
     -----
-    >>> tX = np.array([[9, 2, 7, 3, 1, 8], [2, 6, 1, 8, 1, 7]]).T
+    >>> tX = np.array([[9, 2, 7, 3, 1, 8],
+                       [2, 6, 1, 8, 1, 7]]).T
     >>> y = np.array([-1, 1, -1, 1, 1, -1])
     >>> w, loss = logistic_regression(y, tX)
     >>> print(w, loss)
@@ -478,7 +471,7 @@ def logistic_regression(y, tX, initial_w=None, max_iters=100, gamma=0.1):
         tX = tX.reshape((-1, 1)) # consequently converting to a 2D array
 
     # Zero vector for 'initial_w' if no initial value was specified
-    if initial_w == None:
+    if initial_w is None:
         initial_w = np.zeros(tX.shape[1])
     
     # Converting 1D arrays to 2D arrays
@@ -490,7 +483,7 @@ def logistic_regression(y, tX, initial_w=None, max_iters=100, gamma=0.1):
     log_guard = lambda x : np.maximum(x, 1e-20)
  
     for _ in range(max_iters):
-        sigma = 1.0 / (1 + np.exp( - exp_guard(np.dot(tX, w)))) # Evaluating the sigmoid function
+        sigma = 1 / (1 + np.exp( - exp_guard(np.dot(tX, w)))) # Sigmoid function
         grad = np.dot(tX.T, sigma - y) # Gradient for MSE loss
         w = w - gamma * grad # Updating weights with scaled negative gradient
     # Computing loss for the weights of the final iteration
@@ -530,12 +523,13 @@ def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, g
 
     References
     ----------
-    [7] M. Jaggi, and M. E. Khan, "Logistic Regression",
-        Machine Learning (CS-433), pp. 16-17, October XX, 2021.
+    [7] N. Flammarion, R. Urbanke, and M. E. Khan, "Logistic Regression",
+        Machine Learning (CS-433), pp. 16-17, October 21, 2021.
 
     Usage
     -----
-    >>> tX = np.array([[9, 2, 7, 3, 1, 8], [2, 6, 1, 8, 1, 7]]).T
+    >>> tX = np.array([[9, 2, 7, 3, 1, 8],
+                       [2, 6, 1, 8, 1, 7]]).T
     >>> y = np.array([-1, 1, -1, 1, 1, -1])
     >>> w, loss = reg_logistic_regression(y, tX)
     >>> print(w, loss)
@@ -546,7 +540,7 @@ def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, g
         tX = tX.reshape((-1, 1)) # consequently converting to a 2D array
 
     # Zero vector for 'initial_w' if no initial value was specified
-    if initial_w == None:
+    if initial_w is None:
         initial_w = np.zeros(tX.shape[1])
     
     # Converting 1D arrays to 2D arrays
@@ -557,10 +551,10 @@ def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, g
     log_guard = lambda x : np.maximum(x, 1e-20)
  
     for _ in range(max_iters):
-        sigma = 1 / (1 + np.exp( - exp_guard(np.dot(tX, w)))) # Evaluating the sigmoid function
+        sigma = 1 / (1 + np.exp( - exp_guard(np.dot(tX, w)))) # Sigmoid function
         grad = - np.dot(tX.T, sigma - y) # Gradient for MSE loss
         penalty = lambda_ * w # Calculating "penalty"-term from regularization
-        w = w - gamma * (grad + penalty) # Updating weights with scaled negative gradient and penalty term [7]
+        w = w - gamma * (grad + penalty) # Updating weights [7]
     # Computing loss for the weights of the final iteration
     sigma = 1 / (1 + np.exp( - exp_guard(np.dot(tX, w))))
     # Computing log-loss for the weights in the final iteration
