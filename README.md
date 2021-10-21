@@ -1,21 +1,35 @@
 # ML project 1
 
-## Run project
+[![Status](https://img.shields.io/badge/status-active-success.svg)]()
+
+
+## 📝 Table of Contents
+- [🧐 About]
+- [⛏️ Run project]
+- [🔁 Reproduce results]
+- [🔍 Technical details]
+- [📐 Architecture]
+- [📂 File structure]
+- [📚 References]
+- [✍️ Authors]
+
+## 🧐 About
+Short intro
+
+## ⛏️ Run project
 How users can re-use your code
 It should contain the full instructions on how to run your code
 
-## Technical details
-How you did small technical details
-
-
-## Reproduce results
+## 🔁 Reproduce results
 How to reproduce your obtained results
 
-## Architecture 
+## 🔍 Technical details
+How you did small technical details
+
+## 📐 Architecture 
 Overview of the architecture of your code (what are the different files and what they contain).
 
-
-## File structure
+## 📂 File structure
 
 ```
 ML_project1 
@@ -36,9 +50,9 @@ ML_project1
     |   biblio.bib          (Bibliography file) 
 ```
 
+## 📚 References
 
-## References
-
-
-## Authors
-
+## ✍️ Authors
+- Fabio Matti
+- Ivan Bioli
+- Olivier Staehli
