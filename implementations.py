@@ -483,8 +483,8 @@ def logistic_regression(y, tX, initial_w=None, max_iters=100, gamma=0.1):
     log_guard = lambda x : np.maximum(x, 1e-20)
  
     for _ in range(max_iters):
-        sigma = 1 / (1 + np.exp( - exp_guard(np.dot(tX, w)))) # Sigmoid function
-        grad = np.dot(tX.T, sigma - y) # Gradient for MSE loss
+        sigma = 1 / (1 + np.exp(exp_guard(np.dot(tX, w) * y)))
+        grad = - np.dot(tX.T, sigma * y)
         w = w - gamma * grad # Updating weights with scaled negative gradient
     # Computing loss for the weights of the final iteration
     sigma = 1 / (1 + np.exp( - exp_guard(np.dot(tX, w))))
@@ -551,8 +551,8 @@ def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, g
     log_guard = lambda x : np.maximum(x, 1e-20)
  
     for _ in range(max_iters):
-        sigma = 1 / (1 + np.exp( - exp_guard(np.dot(tX, w)))) # Sigmoid function
-        grad = - np.dot(tX.T, sigma - y) # Gradient for MSE loss
+        sigma = 1 / (1 + np.exp(exp_guard(np.dot(tX, w) * y)))
+        grad = - np.dot(tX.T, sigma * y)
         penalty = lambda_ * w # Calculating "penalty"-term from regularization
         w = w - gamma * (grad + penalty) # Updating weights [7]
     # Computing loss for the weights of the final iteration
