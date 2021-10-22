@@ -9,23 +9,18 @@ We implemented six different regressors, created an optimized regressor and did 
 - [⛏️ Run project](#️-run-project)
 - [🔁 Reproduce results](#️-reproduce-results)
 - [🔍 Technical details](#️-technical-details)
-- [📐 Architecture](#️-architecture)
 - [📂 File structure](#️-file-structure)
 - [📚 References](#️-references)
 - [✍️ Authors](#️-authors)
 
 ## ⛏️ Run project
-How users can re-use your code
-It should contain the full instructions on how to run your code
+Please navigate into this repository and execute the run.py script with the following command: `python run.py`
 
 ## 🔁 Reproduce results
-How to reproduce your obtained results
+Please navigate into this repository and execute the run.py script with the following command: `python run.py`
 
 ## 🔍 Technical details
 How you did small technical details
-
-## 📐 Architecture 
-Overview of the architecture of your code (what are the different files and what they contain).
 
 ## 📂 File structure
 
