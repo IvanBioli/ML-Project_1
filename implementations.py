@@ -151,7 +151,8 @@ def compute_loss_mse(y, tX, w):
     10.25
 
     """
-    e = y - np.dot(tX, w.reshape((-1, 1)))
+    #e = y - np.dot(tX, w.reshape((-1, 1)))
+    e = y - np.dot(tX, w)
     loss = 1/2 * np.mean(np.power(e, 2))
     return loss
 
@@ -234,17 +235,21 @@ def least_squares_GD(y, tX, initial_w=None, max_iters=100, gamma=0.1, tol=None):
     >>> print(w, loss)
     [3.] 0.0
     """
-
+    '''
     if len(tX.shape) == 1: # Checking if 'tX' is a 1D array
         tX = tX.reshape((-1, 1)) # consequently converting to a 2D array
+    '''
 
     # Zero vector for 'initial_w' if no initial value was specified
     if initial_w is None:
         initial_w = np.zeros(tX.shape[1])
     
+    '''
     # Converting 1D arrays to 2D arrays
     w = initial_w.reshape((-1, 1))
     y = y.reshape((-1, 1))
+    '''
+    w = initial_w
 
     for _ in range(max_iters):
         e = y - np.dot(tX, w) # Error vector
@@ -255,9 +260,10 @@ def least_squares_GD(y, tX, initial_w=None, max_iters=100, gamma=0.1, tol=None):
             if (np.linalg.norm(grad) < tol):
                 print("NOTE: Stopping criterion met in iteration ", iter, ".")
                 break
-    loss = np.mean(np.power(e, 2)) / 2 # Computing loss (MSE)
-    w = w.reshape(-1) # Converting weights back to 1D arrays
 
+    loss = np.mean(np.power(e, 2)) / 2 # Computing loss (MSE)
+    
+    #w = w.reshape(-1) # Converting weights back to 1D arrays
     return w, loss
 
 
@@ -305,6 +311,8 @@ def least_squares_SGD(y, tX, initial_w=None, max_iters=100000, gamma=0.1, seed=N
 
     if initial_w is None: # Zero vector for 'initial_w' if none was specified
         w = np.zeros(tX.shape[1])
+    else:
+        w = initial_w
 
     if seed is not None: # Using the desired seed (if one is specified)
         np.random.seed(seed)
@@ -551,6 +559,7 @@ def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, g
     log_guard = lambda x : np.maximum(x, 1e-20)
  
     for _ in range(max_iters):
+
         sigma = 1 / (1 + np.exp(exp_guard(np.dot(tX, w) * y)))
         grad = - np.dot(tX.T, sigma * y)
         penalty = lambda_ * w # Calculating "penalty"-term from regularization
@@ -563,6 +572,7 @@ def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, g
                          lambda_ / 2 * np.dot(w.T, w))
     w = w.reshape(-1) # Converting weights back to 1D arrays
     return w, loss
+
 
 def lasso_SD(y, tX, initial_w, max_iters=1000, gamma=0.1, lambda_ = 0.1, threshold=None):
     """
