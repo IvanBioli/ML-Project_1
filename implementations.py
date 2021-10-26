@@ -40,7 +40,7 @@ def standardize(tX):
         tX_std = tX - feature_mean
         feature_std[zero_ind] = 1
         tX_std /= feature_std
-        print("WARNING: Zero variance feature encountered.")
+        print("WARNING: Zero variance feature(s) at: ", zero_ind)
         print("         Only standardize this one with the feature-mean.")
     return tX_std
 
