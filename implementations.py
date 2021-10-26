@@ -10,7 +10,7 @@ import numpy as np
 
 def standardize(tX):
     """
-    Standardizes the columns in tX to zero mean and unit variance.
+    Standardize the columns in tX to zero mean and unit variance.
 
     Parameters
     ----------
@@ -24,34 +24,27 @@ def standardize(tX):
 
     Usage
     -----
-    >>> tX = np.array([[1, 2],
-                       [0, 4],
-                       [1, 3]])
+    >>> tX = np.array([1, 2, 3, 4])
     >>> tX_std = standardize(tX)
-    >>> print(tX_std)
-    [[ 0.70710678 -1.22474487]
-     [-1.41421356  1.22474487]
-     [ 0.70710678  0.        ]]
-
+    array([-1.34164079, -0.4472136 ,  0.4472136 ,  1.34164079])
     """
 
-    # Calculating the standardization values (feature-wise)
-    feature_mean = np.mean(tX, axis=0)
-    feature_std = np.std(tX, axis=0)
+    feature_mean = np.mean(tX, axis=0)  # Calcule feature-wise mean
+    feature_std = np.std(tX, axis=0)  # Calcule feature-wise standard deviation
 
-    zero_ind = np.argwhere(feature_std == 0)
-    if len(zero_ind) == 0: # Checking for features with zero standard deviation
+    #  Check for zero variance features, and treat them seperately
+    zero_ind = np.argwhere(feature_std == 0)  # Find zero variance features
+    if len(zero_ind) == 0:  #  If no such features exist, standardize normally
         tX_std = (tX - feature_mean) / feature_std
-    else:
+    else:  #  If zero variance features exist, standardize them only with mean
         tX_std = tX - feature_mean
-        feature_std[zero_ind] = 1 # Leaving zero-variance features unchanged
+        feature_std[zero_ind] = 1
         tX_std /= feature_std
         print("WARNING: Zero variance feature encountered.")
-        print("         Only standardized this one with the feature-mean.")
+        print("         Only standardize this one with the feature-mean.")
     return tX_std
 
-
-def polynomial_basis(tX, degrees, indices=False, std=False):
+def polynomial_basis(tX, degrees, std=False):
     """
     Creates a polynomial basis from tX.
 
@@ -62,9 +55,6 @@ def polynomial_basis(tX, degrees, indices=False, std=False):
     degrees : list or int
         List (or int) with the polynomial degrees (or maximum polynomial degree)
         that should be used as basis elements.
-    indices : np.ndarray or False, default=False
-        Chose a subset of indices which should be boosted.
-
     std : bool, default=False
         Standardize features of each polynomial basis element.
 
@@ -84,118 +74,114 @@ def polynomial_basis(tX, degrees, indices=False, std=False):
     -----
     >>> tX = np.array([1, 2, 3, 4])
     >>> tX_poly = polynomial_basis(tX, [0, 1, 2])
-    >>> print(tX_poly)
-    [[ 1.  1.  1.]
-     [ 1.  2.  4.]
-     [ 1.  3.  9.]
-     [ 1.  4. 16.]]
-
-    >>> tX = np.arange(10).reshape((2, 5))
-    >>> tX_poly = polynomial_basis(tX, 2, [1, 2])
-    >>> print(tX_poly)
-    [[ 1.  0.  1.  2.  3.  4.  1.  4.]
-    [ 1.  5.  6.  7.  8.  9. 36. 49.]]
-
+    >>> tX_poly
+    array([[ 1.,  1.,  1.],
+           [ 1.,  2.,  4.],
+           [ 1.,  3.,  9.],
+           [ 1.,  4., 16.]])
     """
 
-    if not indices: # If no indices are selected, use all indices
-        indices = np.arange(tX.shape[1])
-    if isinstance(degrees, int): # Checking if a maximum degree (int) was passed
+    if isinstance(degrees, int):  # Treat integer-valued degree as max degree
         degrees = range(degrees + 1)
-    # Always including the original features (degree 1) as a basis-element
-    if std:
+
+    # Always including the original features as a basis-element
+    if std:  # If standardization is desired, standardize them
         tX_poly = standardize(tX)
     else:
         tX_poly = tX
+
     for deg in degrees:
-        if deg == 0: # Degree zero treated separately to avoid column-duplicates
+        if deg == 0:  # Treat degree zero separately to avoid column-duplicates
             tX_poly = np.column_stack((np.ones(tX.shape[0]), tX_poly))
-        elif deg > 1:
-            if std:
-                tX_poly = np.column_stack((tX_poly, standardize(tX[:, indices]**deg)))
+        elif deg > 1:  # Append higher degree basis elements to 'tX'
+            if std:  # If standardization is desired, standardize them before
+                tX_poly = np.column_stack((tX_poly, standardize(tX**deg)))
             else:
-                tX_poly = np.column_stack((tX_poly, tX[:, indices]**deg))
+                tX_poly = np.column_stack((tX_poly, tX**deg))
     return tX_poly
 
-
-def compute_loss_mse(y, tX, w):
+def _preprocess_arrays(y, tX, initial_w=None):
     """
-    Computes the mean square error (MSE) loss.
+    Convert potential 1D arrays or scalars to 2D arrays to maximize
+    compatibility and set weights 'w' for first iteration.
 
     Parameters
     ----------
-    y : np.ndarray
+    y : np.ndarray or float or int
         Vector with the labels.
-    tX : np.ndarray
+    tX : np.ndarray or float or int
         Array with the samples as rows and the features as columns.
-    w: np.ndarray
-        Vector containing the weights.
+    initial_w : np.ndarray or float or int or None, default=None
+        Vector with initial weights to start the iteration from.
 
     Returns
     -------
-    loss : float
-        Mean square error loss function evaluated with the weights w.
-
-    References
-    ----------
-    [1] M. Jaggi, and M. E. Khan, "Optimization", Machine Learning (CS-433),
-        pp. 6-7, September 23, 2021.
-
-    Usage
-    -----
-    >>> tx = np.array([[1, 2, 3, 4], [1, 2, 3, 4]])
-    >>> y = np.array([5, 6])
-    >>> w = np.array([1, 1, 1, 1])
-    >>> loss = compute_loss_mse(y, tx, w)
-    >>> print(loss)
-    10.25
-
-    """
-    #e = y - np.dot(tX, w.reshape((-1, 1)))
-    e = y - np.dot(tX, w)
-    loss = 1/2 * np.mean(np.power(e, 2))
-    return loss
-
-
-def compute_loss_mae(y, tX, w):
-    """
-    Computes the mean absolute error (MAE) loss.
-
-    Parameters
-    ----------
     y : np.ndarray
-        Vector with the labels.
+        2D array with the labels.
     tX : np.ndarray
-        Array with the samples as rows and the features as columns.
-    w: np.ndarray
-        Vector containing the weights.
+        2D array with the samples as rows and the features as columns.
+    w : np.ndarray
+        2D vector of initial weights.
 
-    Returns
-    -------
-    loss : float
-        Mean absolute error loss function evaluated with the weights w.
+    Notes
+    -----
+    This is crucial, because in most numpy functions, 1D and 2D arrays aren't
+    compatible (i.e. np.dot, np.linalg.solve). Easiest examples are:
 
-    References
-    ----------
-    [1] M. Jaggi, and M. E. Khan, "Optimization", Machine Learning (CS-433),
-        pp. 6-7, September 23, 2021.
+    >>> tX = np.array([1, 2])  # 1D tX
+    >>> y = np.array([2, 4])
+    >>> w = np.array([0])  # Only 1D weight (technically a scalar)
+    >>> np.dot(tX, w)
+    ValueError: shapes (2,) and (1,) not aligned: 2 (dim 0) != 1 (dim 0)
+
+    >>> np.linalg.solve(1, 2)
+    LinAlgError: 0-dimensional array given. Array must be at least 2-dimensional
+
+    By first converting the arrays, it's possible to avoid these error:
+
+    >>> y, tX, w = _preprocess_arrays(y, tX, w)  # Converting arrays
+    >>> np.dot(tX, w)
+    array([[0],
+           [0]])
+
+    >>> y, tX, _ = _preprocess_arrays(1, 2, None)  # Converting arrays
+    >>> np.linalg.solve(y, tX)
+    array([[2.0]])
 
     Usage
     -----
-    >>> tX = np.array([[1, 2, 3, 4], [1, 2, 3, 4]])
-    >>> y = np.array([5, 6])
-    >>> w = np.array([1, 1, 1, 1])
-    >>> loss = compute_loss_mae(y, tx, w)
-    >>> print(loss)
-    4.5
-
+    >>> tX = np.array([1, 2, 3, 4])
+    >>> y = 3*tX
+    >>> y, tX, w = _preprocess_arrays(y, tX, None)
+    >>> y, tX, w
+    (array([[1],
+            [2],
+            [3],
+            [4]]),
+    array([[ 3],
+           [ 6],
+           [ 9],
+           [12]]),
+    array([[0.]]))
     """
-    e = y - np.dot(tX, w.reshape((-1, 1)))
-    loss = np.mean(np.abs(e))
-    return loss
+    tX = np.array(tX)  # Convert tX to a numpy array
+    if len(tX.shape) <= 1:  # Check if 'tX' is 1D, if yes, convert to 2D
+        tX = tX.reshape((-1, 1))
+    if initial_w is None:  # Use zero-vector for 'initial_w' if none specified
+        initial_w = np.zeros(tX.shape[1])  # Works because we convert 'tX' to 2D
+    w = np.array(initial_w).reshape((-1, 1))  # Convert 1D array to 2D array
+    y = np.array(y).reshape((-1, 1))  # Convert 1D array to 2D array
+    return y, tX, w
 
+# Returns mean squared error for labels 'y', design matrix 'tX', and weights 'w'
+def _compute_loss_mse(y, tX, w):
+    return np.mean((y - np.dot(tX, w))**2) / 2
 
-def least_squares_GD(y, tX, initial_w=None, max_iters=100, gamma=0.1, tol=None):
+# Returns gradient of MSE for labels 'y', design matrix 'tX', and weights 'w'
+def _compute_grad_mse(y, tX, w):
+    return -np.dot(tX.T, y - np.dot(tX, w)) / len(y)
+
+def least_squares_GD(y, tX, initial_w=None, max_iters=100, gamma=0.1):
     """
     Gradient descent algorithm for linear regression with MSE loss.
 
@@ -211,9 +197,6 @@ def least_squares_GD(y, tX, initial_w=None, max_iters=100, gamma=0.1, tol=None):
         Maximum number of iterations.
     gamma : float, default=0.1
         Scaling factor for the gradient subtraction.
-    tol : float or None, default=None
-        Tolerance for the norm of the gradient to stop iteration prematurely.
-        No stopping criterion is used if set to 'None'.
 
     Returns
     -------
@@ -232,40 +215,20 @@ def least_squares_GD(y, tX, initial_w=None, max_iters=100, gamma=0.1, tol=None):
     >>> tX = np.array([1, 2, 3, 4])
     >>> y = 3*tX
     >>> w, loss = least_squares_GD(y, tX)
-    >>> print(w, loss)
-    [3.] 0.0
+    >>> w, loss
+    (array([3.]), 0.0)
     """
-    '''
-    if len(tX.shape) == 1: # Checking if 'tX' is a 1D array
-        tX = tX.reshape((-1, 1)) # consequently converting to a 2D array
-    '''
 
-    # Zero vector for 'initial_w' if no initial value was specified
-    if initial_w is None:
-        initial_w = np.zeros(tX.shape[1])
-    
-    '''
-    # Converting 1D arrays to 2D arrays
-    w = initial_w.reshape((-1, 1))
-    y = y.reshape((-1, 1))
-    '''
-    w = initial_w
+    #  Convert from 1D to 2D arrays and set 'w' to zero if 'initial_w' was None
+    y, tX, w = _preprocess_arrays(y, tX, initial_w)
 
     for _ in range(max_iters):
-        e = y - np.dot(tX, w) # Error vector
-        grad = - np.dot(tX.T, e) / len(y) # Gradient for MSE loss
-        w = w - gamma * grad # Updating with scaled negative gradient
-        # Stopping criterion
-        if (tol != None):
-            if (np.linalg.norm(grad) < tol):
-                print("NOTE: Stopping criterion met in iteration ", iter, ".")
-                break
+        grad = _compute_grad_mse(y, tX, w)  # Compute the MSE gradient
+        w = w - gamma * grad  # Update weights with scaled negative gradient
 
-    loss = np.mean(np.power(e, 2)) / 2 # Computing loss (MSE)
-    
-    #w = w.reshape(-1) # Converting weights back to 1D arrays
+    loss = _compute_loss_mse(y, tX, w)  # Compute the MSE loss
+    w = w.reshape(-1)  # Convert weights back to 1D array
     return w, loss
-
 
 def least_squares_SGD(y, tX, initial_w=None, max_iters=100000, gamma=0.1, seed=None):
     """
@@ -304,12 +267,13 @@ def least_squares_SGD(y, tX, initial_w=None, max_iters=100000, gamma=0.1, seed=N
     >>> y = 3*tX
     >>> w, loss = least_squares_SGD(y, tX)
     >>> print(w, loss)
-    [3.] 9.121204216617949e-31
-
+    (array([3.]), 9.121204216617949e-31)
     """
-
-
+    
     if initial_w is None: # Zero vector for 'initial_w' if none was specified
+        tX = np.array(tX)  # Convert tX to a numpy array (to get the shape)
+        if len(tX.shape) <= 1:  # Check if 'tX' is 1D, if yes, convert to 2D
+            tX = tX.reshape((-1, 1))
         w = np.zeros(tX.shape[1])
     else:
         w = initial_w
@@ -318,21 +282,15 @@ def least_squares_SGD(y, tX, initial_w=None, max_iters=100000, gamma=0.1, seed=N
         np.random.seed(seed)
     rand_ind = np.random.choice(np.arange(len(y)), max_iters) # Random indices
 
-    for iter in range(max_iters):
-        # Picking a random sample
-        y_rand = y[rand_ind[iter]]
-        tX_rand = tX[rand_ind[iter]]
+    for i in range(max_iters):
+        y_rand = y[rand_ind[i]]  # Picking the random sample
+        tX_rand = tX[rand_ind[i]]  # Picking the random sample
         e_rand = y_rand - np.inner(tX_rand, w) # Random error
-        grad_rand = - e_rand * tX_rand / len(y) # Random gradient for MSE loss
+        grad_rand = - e_rand * tX_rand # Random gradient for MSE loss
         w = w - gamma * grad_rand # Updating with scaled negative gradient
-        
-        # TODO: find a way to stop the algorithm efficiently
 
-    # Computing loss (MSE) for the weights in the final iteration
-    e = y - np.dot(tX, w)
-    loss = np.mean(np.power(e, 2)) / 2
+    loss = _compute_loss_mse(y, tX, w)  # Compute the MSE loss
     return w, loss
-
 
 def least_squares(y, tX):
     """
@@ -362,19 +320,18 @@ def least_squares(y, tX):
     >>> tX = np.array([1, 2, 3, 4])
     >>> y = 3*tX
     >>> w, loss = least_squares(y, tX)
-    >>> print(w, loss)
-    [3.] 0.0
-
+    >>> w, loss
+    (array([3.]), 0.0)
     """
 
-    y = y.reshape((-1, 1)) # Converting a potential 1D array to a 2D array
-    if len(tX.shape) == 1: # Checking if 'tX' is a 1D array
-        tX = tX.reshape((-1, 1)) # consequently converting to a 2D array
-    w = np.linalg.solve(np.dot(tX.T, tX), np.dot(tX.T, y)) # Solving for w [4]
-    loss = compute_loss_mse(y, tX, w) # Computing loss (MSE)
-    w = w.reshape(-1) # Converting weights back to 1D arrays
-    return w, loss
+    y, tX, _ = _preprocess_arrays(y, tX, None)  #  Convert from 1D to 2D arrays
 
+    #  Solving for the exact weights according to the normal equations in [4]
+    w = np.linalg.solve(np.dot(tX.T, tX), np.dot(tX.T, y))
+
+    loss = _compute_loss_mse(y, tX, w)  # Compute MSE loss
+    w = w.reshape(-1)  # Convert weights back to 1D array
+    return w, loss
 
 def ridge_regression(y, tX, lambda_=0.1):
     """
@@ -404,25 +361,42 @@ def ridge_regression(y, tX, lambda_=0.1):
 
     Usage
     -----
-    >>> tX = np.array([[9, 2, 7, 3, 1, 8],
-                       [2, 6, 1, 8, 1, 7]]).T
+    >>> tX = np.array([1, 2, 3, 4])
     >>> y = 3*tX
     >>> w, loss = ridge_regression(y, tX)
-    >>> print(w, loss)
-    [2.92207792] 0.02276943835385406
+    >>> w, loss
+    (array([2.92207792]), 0.02276943835385406)
     """
 
-    y = y.reshape((-1, 1)) # Converting a potential 1D array to a 2D array
-    if len(tX.shape) == 1: # Checking if 'tX' is a 1D array
-        tX = tX.reshape((-1, 1)) # consequently converting to a 2D array
-    penalty = lambda_ * 2 * len(y) * np.identity(tX.shape[1]) # "Penalty"-term
+    y, tX, _ = _preprocess_arrays(y, tX, None)  #  Convert from 1D to 2D arrays
 
-    # Solving for the exact weights according to the normal equations in [5]
+    #  Solving for the exact weights according to the normal equations in [5]
+    penalty = lambda_ * 2*y.shape[0] * np.identity(tX.shape[1])  # Penalty-term
     w = np.linalg.solve(np.dot(tX.T, tX) + penalty, np.dot(tX.T, y))
-    loss = compute_loss_mse(y, tX, w) # Computing loss (MSE)
-    w = w.reshape(-1) # Converting weights back to 1D arrays
+
+    loss = _compute_loss_mse(y, tX, w)  # Compute MSE loss
+    w = w.reshape(-1)  # Convert weights back to 1D array
     return w, loss
 
+#  Defining overflow-guard for np.exp()
+def _exp_guard(t):
+    return np.clip(t, -709, 709)
+
+#  Defining underflow-guard for np.log()
+def _log_guard(t):
+    return np.maximum(t, 1e-20)
+
+#  Sigmoid function
+def _compute_sigmoid(t):
+    return 1 / (1 + np.exp(_exp_guard(-t)))
+
+#  Logistic loss function for labels in {-1, 1}
+def _compute_loss_log(y, tX, w):
+    return np.log(_log_guard(1 + np.exp(_exp_guard(-np.dot(tX, w) * y)))).sum()
+
+#  Gradient of logistic loss function for labels in {-1, 1}
+def _compute_grad_log(y, tX, w):
+    return -np.dot(tX.T, _compute_sigmoid(-np.dot(tX, w) * y) * y)
 
 def logistic_regression(y, tX, initial_w=None, max_iters=100, gamma=0.1):
     """
@@ -453,55 +427,24 @@ def logistic_regression(y, tX, initial_w=None, max_iters=100, gamma=0.1):
     [6] N. Flammarion, R. Urbanke, and M. E. Khan, "Logistic Regression",
         Machine Learning (CS-433), pp. 2-12, October 21, 2021.
 
-    Notes
-    -----
-    Overflow guards 'exp_guard' and 'log_guard' are there to ensure that
-    np.exp(x) won't overflow and that np.log(x) won't be passed any non-positive
-    values respectively. That's because for
-
-        x > 710 => exp(x) > 1.8e+308
-        x < -710 => exp(-x) > 1.8e+308
-
-    we would observe overflows, as Python's maximum float value is
-
-        np.finfo('d').max = 1.7976931348623157e+308
-
     Usage
     -----
-    >>> tX = np.array([[9, 2, 7, 3, 1, 8],
-                       [2, 6, 1, 8, 1, 7]]).T
-    >>> y = np.array([-1, 1, -1, 1, 1, -1])
-    >>> w, loss = logistic_regression(y, tX)
-    >>> print(w, loss)
-    [-181.50236696   48.74761968] -0.0
+    >>> tX = np.array([1, 2, 3, 4])
+    >>> y = np.array([-1, -1, 1, 1])
+    >>> w, loss = reg_logistic_regression(y, tX)
+    >>> w, loss
+    (array([0.28769978]), 3.358930361591326)
     """
-    if len(tX.shape) == 1: # Checking if 'tX' is a 1D array
-        tX = tX.reshape((-1, 1)) # consequently converting to a 2D array
 
-    # Zero vector for 'initial_w' if no initial value was specified
-    if initial_w is None:
-        initial_w = np.zeros(tX.shape[1])
-    
-    # Converting 1D arrays to 2D arrays
-    w = initial_w.reshape((-1, 1))
-    y = y.reshape((-1, 1))
-
-    # Defining overflow-guards for np.exp() and np.log() (see Notes above)
-    exp_guard = lambda x : np.clip(x, -709, 709)
-    log_guard = lambda x : np.maximum(x, 1e-20)
+    y, tX, w = _preprocess_arrays(y, tX, initial_w)
  
     for _ in range(max_iters):
-        sigma = 1 / (1 + np.exp(exp_guard(np.dot(tX, w) * y)))
-        grad = - np.dot(tX.T, sigma * y)
-        w = w - gamma * grad # Updating weights with scaled negative gradient
-    # Computing loss for the weights of the final iteration
-    sigma = 1 / (1 + np.exp( - exp_guard(np.dot(tX, w))))
-    # Computing log-loss for the weights in the final iteration
-    loss = np.asscalar(- np.dot(y.T, np.log(log_guard(sigma))) -
-                         np.dot((1-y).T, np.log(log_guard(1 - sigma))))
-    w = w.reshape(-1) # Converting weights back to 1D arrays
-    return w, loss
 
+        w = w - gamma * _compute_grad_log(y, tX, w)  # Update [7]
+
+    loss = _compute_loss_log(y, tX, w)  # Compute log-loss for final iteration
+    w = w.reshape(-1)  # Convert weights back to 1D array
+    return w, loss
 
 def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, gamma=0.1):
     """
@@ -534,45 +477,37 @@ def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, g
     [7] N. Flammarion, R. Urbanke, and M. E. Khan, "Logistic Regression",
         Machine Learning (CS-433), pp. 16-17, October 21, 2021.
 
+    Notes
+    -----
+    The function '_exp_guard' is there to make sure that np.exp(x) won't be
+    passed values that are too large
+
+        x > 710 => exp(x) > 1.8e+308
+        x < -710 => exp(-x) > 1.8e+308
+
+    we would observe overflows, as Python's maximum float value is
+
+        np.finfo('d').max = 1.7976931348623157e+308
+
     Usage
     -----
-    >>> tX = np.array([[9, 2, 7, 3, 1, 8],
-                       [2, 6, 1, 8, 1, 7]]).T
-    >>> y = np.array([-1, 1, -1, 1, 1, -1])
+    >>> tX = np.array([1, 2, 3, 4])
+    >>> y = np.array([-1, -1, 1, 1])
     >>> w, loss = reg_logistic_regression(y, tX)
-    >>> print(w, loss)
-    [303.7492403  126.33072599] 5687.462876798688
+    >>> w, loss
+    (array([0.25440098]), 3.2656316398029723)
     """
 
-    if len(tX.shape) == 1: # Checking if 'tX' is a 1D array
-        tX = tX.reshape((-1, 1)) # consequently converting to a 2D array
-
-    # Zero vector for 'initial_w' if no initial value was specified
-    if initial_w is None:
-        initial_w = np.zeros(tX.shape[1])
-    
-    # Converting 1D arrays to 2D arrays
-    w = initial_w.reshape((-1, 1))
-    y = y.reshape((-1, 1))
-    # Defining overflow-guards for np.exp() and np.log() (see Notes above)
-    exp_guard = lambda x : np.clip(x, -709, 709)
-    log_guard = lambda x : np.maximum(x, 1e-20)
+    y, tX, w = _preprocess_arrays(y, tX, initial_w)
  
     for _ in range(max_iters):
 
-        sigma = 1 / (1 + np.exp(exp_guard(np.dot(tX, w) * y)))
-        grad = - np.dot(tX.T, sigma * y)
-        penalty = lambda_ * w # Calculating "penalty"-term from regularization
-        w = w - gamma * (grad + penalty) # Updating weights [7]
-    # Computing loss for the weights of the final iteration
-    sigma = 1 / (1 + np.exp( - exp_guard(np.dot(tX, w))))
-    # Computing log-loss for the weights in the final iteration
-    loss = np.asscalar(- np.dot(y.T, np.log(log_guard(sigma))) -
-                         np.dot((1-y).T, np.log(log_guard(1 - sigma))) +
-                         lambda_ / 2 * np.dot(w.T, w))
-    w = w.reshape(-1) # Converting weights back to 1D arrays
-    return w, loss
+        penalty = 2 * y.shape[0] * lambda_ * w  # Penalty-term
+        w = w - gamma * (_compute_grad_log(y, tX, w) + penalty)  # Update [7]
 
+    loss = _compute_loss_log(y, tX, w)  # Compute log-loss for final iteration
+    w = w.reshape(-1)  # Convert weights back to 1D array
+    return w, loss
 
 def lasso_SD(y, tX, initial_w, max_iters=1000, gamma=0.1, lambda_ = 0.1, threshold=None):
     """
