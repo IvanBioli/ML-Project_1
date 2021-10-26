@@ -32,37 +32,28 @@ _, tX_test, ids_test = load_csv_data('data/test.csv')
 
 # Final experiment configurations
 configs = [{'regressor' : 'least_squares_GD',
-            'degrees' : [1, 2, 3],
-            'params' : {'initial_w': None,
-                        'max_iters': 1800,
-                        'gamma': 0.009}},
+            'degrees' : [1, 2],
+            'params' : {'gamma': 0.1}},
 
             {'regressor' : 'least_squares_SGD',
             'degrees' : [1, 2, 3],
-            'params' : {'initial_w': np.zeros(tX_train.shape[1]),
-                        'max_iters': 9800,
-                        'gamma': 0.098}},
+            'params' : {'gamma': 0.0001}},
 
            {'regressor' : 'least_squares',
-            'degrees' : [1, 2, 3],
+            'degrees' : [1, 2, 3, 4, 5],
             'params' : {}},
 
            {'regressor' : 'ridge_regression',
-            'degrees' : [1, 2, 3],
-            'params' : {'lambda_': 1e-3}},
+            'degrees' : [1, 2, 3, 4, 5],
+            'params' : {'lambda_': 1e-5}},
 
            {'regressor' : 'logistic_regression',
-            'degrees' : [1, 2, 3],
-            'params' : {'initial_w': np.zeros(tX_train.shape[1]),
-                        'max_iters': 100,
-                        'gamma': 0.1}},
+            'degrees' : [0, 1, 2, 3],
+            'params' : {'gamma': 0.001}},
 
            {'regressor' : 'reg_logistic_regression',
-            'degrees' : [1, 2, 3],
-            'params' : {'lambda_': 0.1,
-                        'initial_w': np.zeros(tX_train.shape[1]),
-                        'max_iters': 100,
-                        'gamma': 0.1}}]
+            'degrees' : [0, 1],
+            'params' : {'lambda_': 0.0001}}]
 
 
 for config in configs:
