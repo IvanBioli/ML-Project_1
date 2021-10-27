@@ -390,13 +390,14 @@ def _log_guard(t):
 def _compute_sigmoid(t):
     return 1 / (1 + np.exp(_exp_guard(-t)))
 
-#  Logistic loss function for labels in {-1, 1}
+#  Logistic loss function for labels in {0, 1}
 def _compute_loss_log(y, tX, w):
-    return np.log(_log_guard(1 + np.exp(_exp_guard(-np.dot(tX, w) * y)))).sum()
+    sigma = _compute_sigmoid(np.dot(tX, w))
+    return -np.sum((y * np.log(_log_guard(sigma)) + (1 - y) * np.log(_log_guard(1 - sigma))))
 
-#  Gradient of logistic loss function for labels in {-1, 1}
+#  Gradient of logistic loss function for labels in {0, 1}
 def _compute_grad_log(y, tX, w):
-    return -np.dot(tX.T, _compute_sigmoid(-np.dot(tX, w) * y) * y)
+    return np.dot(tX.T, (_compute_sigmoid(np.dot(tX, w)) - y))
 
 def logistic_regression(y, tX, initial_w=None, max_iters=100, gamma=0.1):
     """
@@ -435,9 +436,12 @@ def logistic_regression(y, tX, initial_w=None, max_iters=100, gamma=0.1):
     >>> w, loss
     (array([0.28769978]), 3.358930361591326)
     """
-
+    # If labels are in {-1, 1} we convert to {0, 1}
+    y[y <= 0] = 0
+    
     y, tX, w = _preprocess_arrays(y, tX, initial_w)
- 
+    
+
     for _ in range(max_iters):
 
         w = w - gamma * _compute_grad_log(y, tX, w)  # Update [7]
@@ -497,9 +501,11 @@ def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, g
     >>> w, loss
     (array([0.25440098]), 3.2656316398029723)
     """
+    # If labels are in {-1, 1} we convert to {0, 1}
+    y[y <= 0] = 0
 
     y, tX, w = _preprocess_arrays(y, tX, initial_w)
- 
+    
     for _ in range(max_iters):
 
         penalty = 2 * y.shape[0] * lambda_ * w  # Penalty-term
