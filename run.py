@@ -30,10 +30,32 @@ y_train, tX_train, _ = load_csv_data('data/train.csv')
 # Loading the test data
 _, tX_test, ids_test = load_csv_data('data/test.csv')
 
+tX_nan_train = np.where(tX_train != -999, tX_train, np.nan)
+med_train = np.nanmedian(tX_nan_train, axis = 0)
+tX_train = np.where(~np.isnan(tX_nan_train), tX_nan_train, med_train)
+
+tX_nan_test = np.where(tX_test != -999, tX_test, np.nan)
+med_test = np.nanmedian(tX_nan_test, axis = 0)
+tX_test = np.where(~np.isnan(tX_nan_test), tX_nan_test, med_test)
+
+configs = [{'regressor' : 'least_squares_GD',
+            'degrees' : [1, 2, 3],
+            'params' : {'gamma': 8e-2, 'max_iters': 200}}]
+
+
+"""
+configs = [{'regressor' : 'least_squares_GD',
+            'degrees' : [1, 2, 3],
+            'params' : {'gamma': 8e-2, 'max_iters': 200}}]
+
+configs = [{'regressor' : 'least_squares_SGD',
+            'degrees' : [1, 2],
+            'params' : {'gamma': 3e-4, 'max_iters': 10000}}]
+
 # Final experiment configurations
 configs = [{'regressor' : 'least_squares_GD',
-            'degrees' : [1, 2],
-            'params' : {'gamma': 0.1}},
+            'degrees' : [1, 2, 3],
+            'params' : {'gamma': 6e-2, 'max_iters': 200}},
 
             {'regressor' : 'least_squares_SGD',
             'degrees' : [1, 2, 3],
@@ -54,7 +76,7 @@ configs = [{'regressor' : 'least_squares_GD',
            {'regressor' : 'reg_logistic_regression',
             'degrees' : [0, 1],
             'params' : {'lambda_': 0.0001}}]
-
+"""
 
 for config in configs:
 
