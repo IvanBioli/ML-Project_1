@@ -24,25 +24,19 @@ def load_csv_data(data_path, sub_sample=False):
     return yb, input_data, ids
 
 
-def predict_labels(weights, data):
-    """Generates class predictions given weights, and a test data matrix"""    
+def predict_labels(weights, data, pred_ratio=False):
+    """Generates class predictions given weights, and a test data matrix"""
     y_pred = np.dot(data, weights)
-    
-    ### Maintaining the prediction ratio
-    thresh = 0
-    """
-    step = 0.01
-    ratio = 0.657332
-    
-    N = y_pred.shape[0]
-    while (sum(y_pred <= thresh) < N*ratio):
 
-        thresh += step
-    """
-    ###
-    y_pred[np.where(y_pred <= thresh)] = -1
-    y_pred[np.where(y_pred > thresh)] = 1
-    
+    # adjust threshold value to obtain a given prediction ratio
+    if not pred_ratio:
+        threshold = 0
+    else:
+        threshold = np.quantile(y_pred, pred_ratio)
+
+    y_pred[np.where(y_pred <= threshold)] = -1
+    y_pred[np.where(y_pred > threshold)] = 1
+
     return y_pred
 
 
