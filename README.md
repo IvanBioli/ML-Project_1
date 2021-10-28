@@ -1,23 +1,35 @@
 # ML project 1 - Higgs Boson
-This git repository is part of the project 1 deliverable in the CS-433 class at EPFL. The aim is to do a binary classification on a 30 feature data set. We want to classify whether it is a strange or bottom quarks.
-We implemented six different regressors, created an optimized regressor and did the feature preprocessing.
+We implement six standard versions and one optimized version of a linear egressor. Subsequently, the Higgs boson data set for binary classification from 30 numerical features is used for testing our implementations. We perform various preprocessing techniques and tune the parameters of our regressors to maximize in first priority the F1-score and in second priority the accuracy of the predictions.
+
+The features in the data set record numerical measurements that coincide with the observation of either a decay signature that was caused by an event involving a Higgs boson ('s' for signal) or one that is not related to Higgs boson like decays ('b' for background) \cite{higgs2014}. Based on 250'000 samples of training data, our goal is to predict the unknown labels for the test data.
 
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
 
 
 ## 📝 Table of Contents
-- [⛏️ Run project](#️-run-project)
+- [⛏️ Minimal working example](#️-minimal-working-example)
 - [🔁 Reproduce results](#️-reproduce-results)
 - [🔍 Technical details](#️-technical-details)
 - [📂 File structure](#️-file-structure)
 - [📚 References](#️-references)
 - [✍️ Authors](#️-authors)
 
-## ⛏️ Run project
-Please navigate into this repository and execute the run.py script with the following command: `python run.py`
+## ⛏️ Minimal working example
+Open your terminal, and use the command `git clone https://github.com/FMatti/ML_project1` to clone a copy of our repository on your machine. For a minimal working example of our implementations, open a new python file, and execute the following program:
+
+    from proj1_helpers import *
+    from implementations import *
+    y_train, tX_train, _ = load_csv_data('data/train.csv')
+    tX_train = standardize(tX_train)
+    print(least_squares_GD(y_train, tX_train))
+    print(least_squares_SGD(y_train, tX_train))
+    print(least_squares(y_train, tX_train))
+    print(ridge_regression(y_train, tX_train))
+    print(logistic_regression(y_train, tX_train))
+    print(reg_logistic_regression(y_train, tX_train))
 
 ## 🔁 Reproduce results
-Please navigate into this repository and execute the run.py script with the following command: `python run.py`
+To reproduce the results we have shown in Table 2 of our report, please navigate into this repository and execute the run.py script with the following command: `python run.py`. The predictions for each of the regressor configurations used will be stored in the folder `data/submission_[NAME OF THE REGRESSOR]`.
 
 ## 🔍 Technical details
 How you did small technical details
@@ -33,8 +45,8 @@ ML_project1
 │   run.py                  (To be executed to get the results) 
 │
 └───data
-│   │   test.csv	          (Test data)
-│   │   train.csv	          (Training data)
+│   │   test.csv	        (Test data)
+│   │   train.csv	        (Training data)
 │   │   submission.csv      (Submitted predictions)
 │   
 └───report
@@ -44,7 +56,9 @@ ML_project1
 ```
 
 ## 📚 References
+[1] Adam-Bourdariosa C., Cowanb G., Germain C.,I. Guyond B. Kégl, Rousseau D.Learning to discover: [The Higgs boson machine learning challenge](https://higgsml.lal.in2p3.fr/files/2014/04/documentation_v1.8.pdf). 2014. 
 
+[2] Jaggi M., Urbanke R., Khan M. E.Machine Learning (CS-433): [Lecture notes](https://github.com/epfml/ML_course). 2021.
 
 ## ✍️ Authors
 - Fabio Matti
