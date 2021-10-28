@@ -1,7 +1,7 @@
 # ML project 1 - Higgs Boson
 We implement six standard versions and one optimized version of a linear egressor. Subsequently, the Higgs boson data set for binary classification from 30 numerical features is used for testing our implementations. We perform various preprocessing techniques and tune the parameters of our regressors to maximize in first priority the F1-score and in second priority the accuracy of the predictions.
 
-The features in the data set record numerical measurements that coincide with the observation of either a decay signature that was caused by an event involving a Higgs boson ('s' for signal) or one that is not related to Higgs boson like decays ('b' for background) \cite{higgs2014}. Based on 250'000 samples of training data, our goal is to predict the unknown labels for the test data.
+The features in the data set record numerical measurements that coincide with the observation of either a decay signature that was caused by an event involving a Higgs boson ('s' for signal) or one that is not related to Higgs boson like decays ('b' for background). Based on 250'000 samples of training data, our goal is to predict the unknown labels for the test data.
 
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
 
