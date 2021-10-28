@@ -80,7 +80,6 @@ def polynomial_basis(tX, degrees, std=False):
            [ 1.,  3.,  9.],
            [ 1.,  4., 16.]])
     """
-
     if isinstance(degrees, int):  # Treat integer-valued degree as max degree
         degrees = range(degrees + 1)
 
@@ -99,6 +98,40 @@ def polynomial_basis(tX, degrees, std=False):
             else:
                 tX_poly = np.column_stack((tX_poly, tX**deg))
     return tX_poly
+
+def substitute_outliers(tX, substitute):
+    """
+    Replace outlier values '-999' with a substitute.
+
+    Parameters
+    ----------
+    tX : np.ndarray or float or int
+        Array with the samples as rows and the features as columns.
+    substitute : str {'zeros', 'mean', 'median'}
+        Value to be substituted for -999. Column-wise mean and median are used.
+
+    Returns
+    -------
+    tX_substituted : np.ndarray
+        2D array with the outliers replaced with the substitute.
+
+    Usage
+    -----
+    >>> tX = np.array([1, 2, -99, 4])
+    >>> tX_substituted = substitute_outliers(tX, 'zero')
+    >>> tX_substituted
+    array([1, 2, 0, 4])
+    """
+    tX_nan = np.where(tX != -999, tX, np.nan)
+    if substitute == "zero":
+        tX_substituted = np.where(~np.isnan(tX_nan), tX_nan, 0)
+    elif substitute == "mean":
+        mean = np.nanmean(tX_nan, axis=0)
+        tX_substituted = np.where(~np.isnan(tX_nan), tX_nan, mean)
+    elif substitute == "median":
+        median = np.nanmean(tX_nan, axis=0)
+        tX_substituted = np.where(~np.isnan(tX_nan), tX_nan, median)
+    return tX_substituted
 
 def _preprocess_arrays(y, tX, initial_w=None):
     """
