@@ -98,15 +98,17 @@ def polynomial_basis(tX, degrees, std=False):
                 tX_poly = np.column_stack((tX_poly, tX**deg))
     return tX_poly
 
-def substitute_outliers(tX, substitute):
+def substitute_999(tX_base, tX_modify, substitute):
     """
     Replace outlier values '-999' with a substitute.
 
     Parameters
     ----------
-    tX : np.ndarray or float or int
+    tX_base : np.ndarray or float or int
         Array with the samples as rows and the features as columns.
-    substitute : str {'zeros', 'mean', 'median'}
+    tX_modify : np.ndarray or float or int
+        Array with the samples as rows and the features as columns.
+    substitute : str {'zero', 'mean', 'median'}
         Value to be substituted for -999. Column-wise mean and median are used.
 
     Returns
@@ -121,15 +123,50 @@ def substitute_outliers(tX, substitute):
     >>> tX_substituted
     array([1, 2, 0, 4])
     """
-    tX_nan = np.where(tX != -999, tX, np.nan)
+    tX_nan_base = np.where(tX_base != -999, tX_base, np.nan)
+    tX_nan_modify = np.where(tX_modify != -999, tX_modify, np.nan)
     if substitute == "zero":
-        tX_substituted = np.where(~np.isnan(tX_nan), tX_nan, 0)
+        tX_substituted = np.where(~np.isnan(tX_nan_modify), tX_nan_modify, 0)
     elif substitute == "mean":
-        mean = np.nanmean(tX_nan, axis=0)
-        tX_substituted = np.where(~np.isnan(tX_nan), tX_nan, mean)
+        mean = np.nanmean(tX_nan_base, axis=0)
+        tX_substituted = np.where(~np.isnan(tX_nan_modify), tX_nan_modify, mean)
     elif substitute == "median":
-        median = np.nanmean(tX_nan, axis=0)
-        tX_substituted = np.where(~np.isnan(tX_nan), tX_nan, median)
+        median = np.nanmean(tX_nan_base, axis=0)
+        tX_substituted = np.where(~np.isnan(tX_nan_modify), tX_nan_modify, median)
+    return tX_substituted
+
+def substitute_outliers(tX_base, tX_modify, substitute, level):
+    """
+    Standardize the columns in tX to zero mean and unit variance.
+
+    Parameters
+    ----------
+    tX : np.ndarray
+        Array with the samples as rows and the features as columns.
+
+    Returns
+    -------
+    tX_std : np.ndarray
+        Standardized tX with zero feature-means and unit feature-variance.
+
+    Usage
+    -----
+    >>> tX = np.array([1, 2, 3, 4])
+    >>> tX_std = standardize(tX)
+    array([-1.34164079, -0.4472136 ,  0.4472136 ,  1.34164079])
+    """
+
+    if substitute == "mean":
+        center = np.mean(tX_base, axis=0)  # Calcule feature-wise mean
+        threshold = level * np.std(tX_base, axis=0)  # Calcule feature-wise threshold
+    elif substitute == "median":
+        center = np.median(tX_base, axis=0)  # Calcule feature-wise mean
+        IQR = np.quantile(tX_base, 0.75, axis=0) - np.quantile(tX_base, 0.25, axis=0)
+        threshold = level * IQR
+
+#    tX_base_substituted = np.where(np.abs(tX_base - center) < threshold, tX_base, center)
+    tX_substituted = np.where(np.abs(tX_modify - center) < threshold, tX_modify, center)
+
     return tX_substituted
 
 def _preprocess_arrays(y, tX, initial_w=None):
@@ -461,7 +498,7 @@ def logistic_regression(y, tX, initial_w=None, max_iters=100, gamma=0.1):
     Usage
     -----
     >>> tX = np.array([1, 2, 3, 4])
-    >>> y = np.array([-1, -1, 1, 1])
+    >>> y = np.array([0, 0, 1, 1])
     >>> w, loss = reg_logistic_regression(y, tX)
     >>> w, loss
     (array([0.28769978]), 3.358930361591326)
@@ -525,7 +562,7 @@ def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, g
     Usage
     -----
     >>> tX = np.array([1, 2, 3, 4])
-    >>> y = np.array([-1, -1, 1, 1])
+    >>> y = np.array([0, 0, 1, 1])
     >>> w, loss = reg_logistic_regression(y, tX)
     >>> w, loss
     (array([0.25440098]), 3.2656316398029723)
