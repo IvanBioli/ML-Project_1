@@ -8,14 +8,16 @@ The function descriptions were heavily inspired by the numpy package.
 
 import numpy as np
 
-def standardize(tX):
+def standardize(tX_base, tX_modify=None):
     """
     Standardize the columns in tX to zero mean and unit variance.
 
     Parameters
     ----------
-    tX : np.ndarray
-        Array with the samples as rows and the features as columns.
+    tX_base : np.ndarray
+        Base array to be used to calculate column-mean and standard deviation.
+    tX_modify : np.ndarray or None
+        Array to be standardized. Standardize tX_base if None was passed.
 
     Returns
     -------
@@ -28,34 +30,38 @@ def standardize(tX):
     >>> tX_std = standardize(tX)
     array([-1.34164079, -0.4472136 ,  0.4472136 ,  1.34164079])
     """
-    feature_mean = np.mean(tX, axis=0)  # Calcule feature-wise mean
-    feature_std = np.std(tX, axis=0)  # Calcule feature-wise standard deviation
+    if tX_modify is None:  # Use base array if no modify array specified
+        tX_modify = tX_base
 
-    #  Check for zero variance features, and treat them seperately
+    feature_mean = np.mean(tX_base, axis=0)  # Calcule feature-wise mean
+    feature_std = np.std(tX_base, axis=0)  # Calcule feature-wise standard deviation
+
     zero_ind = np.argwhere(feature_std == 0)  # Find zero variance features
     if len(zero_ind) == 0:  #  If no such features exist, standardize normally
-        tX_std = (tX - feature_mean) / feature_std
+        tX_std = (tX_modify - feature_mean) / feature_std
     else:  #  If zero variance features exist, standardize them only with mean
-        tX_std = tX - feature_mean
+        tX_std = tX_modify - feature_mean
         feature_std[zero_ind] = 1
         tX_std /= feature_std
         print("WARNING: Zero variance feature(s) at: ", zero_ind)
         print("         Only standardize this one with the feature-mean.")
     return tX_std
 
-def polynomial_basis(tX, degrees, std=False):
+def polynomial_basis(tX_base, degrees, std=True, tX_modify=None):
     """
     Creates a polynomial basis from tX.
 
     Parameters
     ----------
-    tX : np.ndarray
-        Array with the samples as rows and the features as columns.
+    tX_base : np.ndarray
+        Base array to be used to calculate column-mean and standard deviation.
     degrees : list or int
         List (or int) with the polynomial degrees (or maximum polynomial degree)
         that should be used as basis elements.
-    std : bool, default=False
+    std : bool, default=True
         Standardize features of each polynomial basis element.
+    tX_modify : np.ndarray or None, default=None
+        Array to be standardized. Standardize tX_base if None was passed.
 
     Returns
     -------
@@ -82,89 +88,99 @@ def polynomial_basis(tX, degrees, std=False):
     if isinstance(degrees, int):  # Treat integer-valued degree as max degree
         degrees = range(degrees + 1)
 
+    if tX_modify is None:  # Use base array if no modify array specified
+        tX_modify = tX_base
+
     # Always including the original features as a basis-element
     if std:  # If standardization is desired, standardize them
-        tX_poly = standardize(tX)
+        tX_poly = standardize(tX_base, tX_modify)
     else:
-        tX_poly = tX
+        tX_poly = tX_modify
 
     for deg in degrees:
         if deg == 0:  # Treat degree zero separately to avoid column-duplicates
-            tX_poly = np.column_stack((np.ones(tX.shape[0]), tX_poly))
+            tX_poly = np.column_stack((np.ones(tX_modify.shape[0]), tX_poly))
         elif deg > 1:  # Append higher degree basis elements to 'tX'
             if std:  # If standardization is desired, standardize them before
-                tX_poly = np.column_stack((tX_poly, standardize(tX**deg)))
+                tX_poly = np.column_stack((tX_poly, standardize(tX_base**deg, tX_modify**deg)))
             else:
-                tX_poly = np.column_stack((tX_poly, tX**deg))
+                tX_poly = np.column_stack((tX_poly, tX_modify**deg))
     return tX_poly
 
-def substitute_999(tX_base, tX_modify, substitute):
+def substitute_999(tX_base, tX_modify, substitute='median'):
     """
-    Replace outlier values '-999' with a substitute.
+    Replace values '-999' with a substitute.
 
     Parameters
     ----------
-    tX_base : np.ndarray or float or int
-        Array with the samples as rows and the features as columns.
-    tX_modify : np.ndarray or float or int
-        Array with the samples as rows and the features as columns.
-    substitute : str {'zero', 'mean', 'median'}
-        Value to be substituted for -999. Column-wise mean and median are used.
+    tX_base : np.ndarray
+        Base array to be used to calculate column-mean or -median with.
+    tX_modify : np.ndarray
+        Array to have -999 replaced by zero or the means/medians of tX_base.
+    substitute : str {'zero', 'mean', 'median'}, default='median'
+        Value to be substituted for -999. Column-wise mean or median are used.
 
     Returns
     -------
     tX_substituted : np.ndarray
-        2D array with the outliers replaced with the substitute.
+        2D array with the -999 values replaced by the substitute.
 
     Usage
     -----
-    >>> tX = np.array([1, 2, -99, 4])
-    >>> tX_substituted = substitute_outliers(tX, 'zero')
-    >>> tX_substituted
-    array([1, 2, 0, 4])
+    >>> tX_base = np.array([1, 2, -999, 4])
+    >>> tX_modify = np.array([1, 2, 3, 4])
+    >>> tX_clean = substitute_999(tX_base, tX_modify, 'median')
+    >>> tX_clean
+    array([1. , 2. , 2.5 ,  4])
     """
     tX_nan_base = np.where(tX_base != -999, tX_base, np.nan)
     tX_nan_modify = np.where(tX_modify != -999, tX_modify, np.nan)
-    if substitute == "zero":
+    if substitute == 'zero':
         tX_substituted = np.where(~np.isnan(tX_nan_modify), tX_nan_modify, 0)
-    elif substitute == "mean":
+    elif substitute == 'mean':
         mean = np.nanmean(tX_nan_base, axis=0)
         tX_substituted = np.where(~np.isnan(tX_nan_modify), tX_nan_modify, mean)
-    elif substitute == "median":
+    elif substitute == 'median':
         median = np.nanmean(tX_nan_base, axis=0)
         tX_substituted = np.where(~np.isnan(tX_nan_modify), tX_nan_modify, median)
     return tX_substituted
 
-def substitute_outliers(tX_base, tX_modify, substitute, level):
+def substitute_outliers(tX_base, tX_modify, substitute='mean', level=3):
     """
-    Standardize the columns in tX to zero mean and unit variance.
+    Replace outlier values with a substitute.
 
     Parameters
     ----------
-    tX : np.ndarray
-        Array with the samples as rows and the features as columns.
+    tX_base : np.ndarray
+        Base array to be used to calculate column-mean or -median with.
+    tX_modify : np.ndarray or float or int
+        Array to have -999 replaced by zero or the means/medians of tX_base.
+    substitute : str {'mean', 'median'}, default='mean'
+        Value to replace outliers with. Column-wise mean or median are used.
+    level : float, default=3
+        The sensitivity level for declaring outliers. The threshold for outliers
+        depends on substitute: |level*stdev  - mean| or |level*IQR  - median|.
 
     Returns
     -------
-    tX_std : np.ndarray
-        Standardized tX with zero feature-means and unit feature-variance.
+   tX_substituted : np.ndarray
+        2D array with the outliers replaced by the substitute.
 
     Usage
     -----
-    >>> tX = np.array([1, 2, 3, 4])
-    >>> tX_std = standardize(tX)
-    array([-1.34164079, -0.4472136 ,  0.4472136 ,  1.34164079])
+    >>> tX_base = np.array([1, 2, 1000, 4])
+    >>> tX_modify = np.array([1, 2, 3, 4])
+    >>> tX_clean = substitute_outliers(tX_base, tX_modify, 'mean', 3)
+    >>> tX_clean
+    array([1. , 2. , 2.5 ,  4])
     """
-
-    if substitute == "mean":
+    if substitute == 'mean':
         center = np.mean(tX_base, axis=0)  # Calcule feature-wise mean
-        threshold = level * np.std(tX_base, axis=0)  # Calcule feature-wise threshold
-    elif substitute == "median":
-        center = np.median(tX_base, axis=0)  # Calcule feature-wise mean
+        threshold = level * np.std(tX_base, axis=0)  # Calcule threshold
+    elif substitute == 'median':
+        center = np.median(tX_base, axis=0)  # Calcule feature-wise median
         IQR = np.quantile(tX_base, 0.75, axis=0) - np.quantile(tX_base, 0.25, axis=0)
-        threshold = level * IQR
-
-#    tX_base_substituted = np.where(np.abs(tX_base - center) < threshold, tX_base, center)
+        threshold = level * IQR  # Threshold derived from inter-quartile range
     tX_substituted = np.where(np.abs(tX_modify - center) < threshold, tX_modify, center)
 
     return tX_substituted
