@@ -18,22 +18,24 @@ The features in the data set record numerical measurements that coincide with th
 To get a minimal working example of the regressors, perform the following steps:
 1. Open your terminal, and use the command `git clone https://github.com/FMatti/ML_project1` to clone our repository on your machine.
 2. Unzip the `data.zip` archive to obtain the [train.csv](https://github.com/epfml/ML_course/blob/master/projects/project1/data/train.csv.zip) and [test.csv](https://github.com/epfml/ML_course/blob/master/projects/project1/data/test.csv.zip) files.
-3. For a minimal working example of our implementations, simply run the following lines of code:
+3. For a quick demonstration of each of our implementations, simply run the following lines of code:
 
-    from proj1_helpers import *
-    from implementations import *
-    y_train, tX_train, _ = load_csv_data('data/train.csv')
-    tX_train = standardize(tX_train)
-    print(least_squares_GD(y_train, tX_train))
-    print(least_squares_SGD(y_train, tX_train))
-    print(least_squares(y_train, tX_train))
-    print(ridge_regression(y_train, tX_train))
-    print(logistic_regression(y_train, tX_train))
-    print(reg_logistic_regression(y_train, tX_train))
+        from implementations import *
+
+        tX = np.array([1, 2, 3, 4])
+        y = 3*tX
+        print(least_squares_GD(y, tX))
+        print(least_squares_SGD(y, tX))
+        print(least_squares(y, tX))
+        print(ridge_regression(y, tX))
+
+        y = np.array([0, 0, 1, 1])
+        print(logistic_regression(y, tX))
+        print(reg_logistic_regression(y, tX))
 
 
 ## 🔁 Reproduce results
-To reproduce the results we have shown in Table 2 of our report, follow the instructions in [⛏️ Quick start](#️-quick-start) and then execute the run.py script with the following command: `python run.py`. The predictions for each of the regressor configurations will then be stored in the directory `data/submission_[NAME OF THE REGRESSOR]`.
+To reproduce the results we show in Table 2 of our report, follow the instructions 1. and 2. in [⛏️ Quick start](#️-quick-start) and then execute the run.py script with the following command: `python run.py`. The predictions for each of the regressor configurations will then be stored in the directory `data/submission_[NAME OF THE REGRESSOR]`.
 
 
 ## 📂 File structure
