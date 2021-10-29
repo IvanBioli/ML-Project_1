@@ -7,14 +7,18 @@ The features in the data set record numerical measurements that coincide with th
 
 
 ## 📝 Table of Contents
-- [⛏️ Minimal working example](#️-minimal-working-example)
+- [⛏️ Quick start](#️-quick-start)
 - [🔁 Reproduce results](#️-reproduce-results)
 - [📂 File structure](#️-file-structure)
 - [📚 References](#️-references)
 - [✍️ Authors](#️-authors)
 
-## ⛏️ Minimal working example
-Open your terminal, and use the command `git clone https://github.com/FMatti/ML_project1` to clone a copy of our repository on your machine. For a minimal working example of our implementations, open a new python file, and execute the following program:
+
+## ⛏️ Quick start
+To get a minimal working example of the regressors, perform the following steps:
+1. Open your terminal, and use the command `git clone https://github.com/FMatti/ML_project1` to clone our repository on your machine.
+2. Unzip the `data.zip` archive to obtain the [train.csv](https://github.com/epfml/ML_course/blob/master/projects/project1/data/train.csv.zip) and [test.csv](https://github.com/epfml/ML_course/blob/master/projects/project1/data/test.csv.zip) files.
+3. For a minimal working example of our implementations, simply run the following lines of code:
 
     from proj1_helpers import *
     from implementations import *
@@ -27,8 +31,9 @@ Open your terminal, and use the command `git clone https://github.com/FMatti/ML_
     print(logistic_regression(y_train, tX_train))
     print(reg_logistic_regression(y_train, tX_train))
 
+
 ## 🔁 Reproduce results
-To reproduce the results we have shown in Table 2 of our report, please navigate into this repository, download the [train.csv](https://github.com/epfml/ML_course/blob/master/projects/project1/data/train.csv.zip) and [test.csv](https://github.com/epfml/ML_course/blob/master/projects/project1/data/test.csv.zip) files and place them in a folder called `data`, and execute the run.py script with the following command: `python run.py`. The predictions for each of the regressor configurations used will be stored in the folder `data/submission_[NAME OF THE REGRESSOR]`.
+To reproduce the results we have shown in Table 2 of our report, follow the instructions in [⛏️ Quick start](#️-quick-start) and then execute the run.py script with the following command: `python run.py`. The predictions for each of the regressor configurations will then be stored in the directory `data/submission_[NAME OF THE REGRESSOR]`.
 
 
 ## 📂 File structure
@@ -41,7 +46,7 @@ ML_project1
 │   implementations.py      (Contains all the implemented regressors)
 │   run.py                  (To be executed to get the results) 
 │
-└───data
+└───data.zip
 │   │   test.csv	        (Test data)
 │   │   train.csv           (Training data)
 │   
