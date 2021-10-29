@@ -28,7 +28,6 @@ def standardize(tX):
     >>> tX_std = standardize(tX)
     array([-1.34164079, -0.4472136 ,  0.4472136 ,  1.34164079])
     """
-
     feature_mean = np.mean(tX, axis=0)  # Calcule feature-wise mean
     feature_std = np.std(tX, axis=0)  # Calcule feature-wise standard deviation
 
@@ -220,11 +219,11 @@ def least_squares_GD(y, tX, initial_w=None, max_iters=100, gamma=0.1):
 
     Parameters
     ----------
-    y : np.ndarray
+    y : np.ndarray (N,)
         Vector with the labels.
-    tX : np.ndarray
+    tX : np.ndarray (N,) or (N, D)
         Array with the samples as rows and the features as columns.
-    initial_w : np.ndarray or None, default=None
+    initial_w : np.ndarray (D,) or None, default=None
         Vector with initial weights to start the iteration from.
     max_iters : int, default=100
         Maximum number of iterations.
@@ -233,7 +232,7 @@ def least_squares_GD(y, tX, initial_w=None, max_iters=100, gamma=0.1):
 
     Returns
     -------
-    w : np.ndarray
+    w : np.ndarray (D,)
         Vector containing the optimized weights.
     loss : float
         Mean square error loss function evaluated with the optimized weights.
@@ -251,8 +250,6 @@ def least_squares_GD(y, tX, initial_w=None, max_iters=100, gamma=0.1):
     >>> w, loss
     (array([3.]), 0.0)
     """
-
-    #  Convert from 1D to 2D arrays and set 'w' to zero if 'initial_w' was None
     y, tX, w = _preprocess_arrays(y, tX, initial_w)
 
     for _ in range(max_iters):
@@ -269,11 +266,11 @@ def least_squares_SGD(y, tX, initial_w=None, max_iters=100000, gamma=0.1, seed=N
 
     Parameters
     ----------
-    y : np.ndarray
+    y : np.ndarray (N,)
         Vector with the labels.
-    tX : np.ndarray
+    tX : np.ndarray (N,) or (N, D)
         Array with the samples as rows and the features as columns.
-    initial_w : np.ndarray or None, default=None
+    initial_w : np.ndarray (D,) or None, default=None
         Vector with initial weights to start the iteration from.
     max_iters : int, default=100000
         Maximum number of iterations.
@@ -284,7 +281,7 @@ def least_squares_SGD(y, tX, initial_w=None, max_iters=100000, gamma=0.1, seed=N
 
     Returns
     -------
-    w : np.ndarray
+    w : np.ndarray (D,)
         Vector containing the final weights.
     loss : float
         Mean square error loss function evaluated with the final weights.
@@ -299,10 +296,9 @@ def least_squares_SGD(y, tX, initial_w=None, max_iters=100000, gamma=0.1, seed=N
     >>> tX = np.array([1, 2, 3, 4])
     >>> y = 3*tX
     >>> w, loss = least_squares_SGD(y, tX)
-    >>> print(w, loss)
+    >>> w, loss
     (array([3.]), 9.121204216617949e-31)
     """
-    
     if initial_w is None: # Zero vector for 'initial_w' if none was specified
         tX = np.array(tX)  # Convert tX to a numpy array (to get the shape)
         if len(tX.shape) <= 1:  # Check if 'tX' is 1D, if yes, convert to 2D
@@ -331,14 +327,14 @@ def least_squares(y, tX):
 
     Parameters
     ----------
-    y : np.ndarray
+    y : np.ndarray (N,)
         Vector with the labels.
-    tX : np.ndarray
+    tX : np.ndarray (N,) or (N, D)
         Array with the samples as rows and the features as columns.
 
     Returns
     -------
-    w : np.ndarray
+    w : np.ndarray (D,)
         Vector containing the final weights.
     loss : float
         Mean square error loss function evaluated with the final weights.
@@ -373,16 +369,16 @@ def ridge_regression(y, tX, lambda_=0.1):
 
     Parameters
     ----------
-    y : np.ndarray
+    y : np.ndarray (N,)
         Vector with the labels.
-    tX : np.ndarray
+    tX : np.ndarray (N,) or (N, D)
         Array with the samples as rows and the features as columns.
     lambda_ : float, default=0.1
         Regularization parameter.
 
     Returns
     -------
-    w : np.ndarray
+    w : np.ndarray (D,)
         Vector containing the final weights.
     loss : float
         Mean square error loss function evaluated with the final weights.
@@ -404,7 +400,7 @@ def ridge_regression(y, tX, lambda_=0.1):
     y, tX, _ = _preprocess_arrays(y, tX, None)  #  Convert from 1D to 2D arrays
 
     #  Solving for the exact weights according to the normal equations in [5]
-    penalty = lambda_ * 2*y.shape[0] * np.identity(tX.shape[1])  # Penalty-term
+    penalty = lambda_ * 2*len(y) * np.identity(tX.shape[1])  # Penalty-term
     w = np.linalg.solve(np.dot(tX.T, tX) + penalty, np.dot(tX.T, y))
 
     loss = _compute_loss_mse(y, tX, w)  # Compute MSE loss
@@ -426,7 +422,8 @@ def _compute_sigmoid(t):
 #  Logistic loss function for labels in {0, 1}
 def _compute_loss_log(y, tX, w):
     sigma = _compute_sigmoid(np.dot(tX, w))
-    return -np.sum((y * np.log(_log_guard(sigma)) + (1 - y) * np.log(_log_guard(1 - sigma))))
+    return -np.sum((y * np.log(_log_guard(sigma)) +
+                   (1 - y) * np.log(_log_guard(1 - sigma))))
 
 #  Gradient of logistic loss function for labels in {0, 1}
 def _compute_grad_log(y, tX, w):
@@ -438,11 +435,11 @@ def logistic_regression(y, tX, initial_w=None, max_iters=100, gamma=0.1):
 
     Parameters
     ----------
-    y : np.ndarray
+    y : np.ndarray (N,) in {-1, 1} or {0, 1}
         Vector with the labels.
-    tX : np.ndarray
+    tX : np.ndarray (N,) or (N, D)
         Array with the samples as rows and the features as columns.
-    initial_w : np.ndarray or None, default=None
+    initial_w : np.ndarray (D,) or None, default=None
         Vector with initial weights to start the iteration from.
     max_iters : int, default=100
         Maximum number of iterations.
@@ -451,7 +448,7 @@ def logistic_regression(y, tX, initial_w=None, max_iters=100, gamma=0.1):
 
     Returns
     -------
-    w : np.ndarray
+    w : np.ndarray (D,)
         Vector containing the final weights.
     loss : float
         Mean square error loss function evaluated with the final weights.
@@ -476,7 +473,6 @@ def logistic_regression(y, tX, initial_w=None, max_iters=100, gamma=0.1):
     
 
     for _ in range(max_iters):
-
         w = w - gamma * _compute_grad_log(y, tX, w)  # Update [7]
 
     loss = _compute_loss_log(y, tX, w)  # Compute log-loss for final iteration
@@ -489,13 +485,13 @@ def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, g
 
     Parameters
     ----------
-    y : np.ndarray
+    y : np.ndarray (N,) in {-1, 1} or {0, 1}
         Vector with the labels.
-    tX : np.ndarray
+    tX : np.ndarray (N,) or (N, D)
         Array with the samples as rows and the features as columns.
     lambda_ : float, default=0.1
         Regularization parameter.
-    initial_w : np.ndarray or None, default=None
+    initial_w : np.ndarray (D,) or None, default=None
         Vector with initial weights to start the iteration from.
     max_iters : int, default=100
         Maximum number of iterations.
@@ -504,7 +500,7 @@ def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, g
 
     Returns
     -------
-    w : np.ndarray
+    w : np.ndarray (D,)
         Vector containing the final weights.
     loss : float
         Mean square error loss function evaluated with the final weights.
@@ -534,31 +530,29 @@ def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, g
     >>> w, loss
     (array([0.25440098]), 3.2656316398029723)
     """
-    # If labels are in {-1, 1} we convert to {0, 1}
-    y[y <= 0] = 0
+    y[y <= 0] = 0  # If labels are in {-1, 1}, convert them to {0, 1}
 
     y, tX, w = _preprocess_arrays(y, tX, initial_w)
     
     for _ in range(max_iters):
-
-        penalty = 2 * y.shape[0] * lambda_ * w  # Penalty-term
+        penalty = 2*len(y) * lambda_ * w  # Penalty-term
         w = w - gamma * (_compute_grad_log(y, tX, w) + penalty)  # Update [7]
 
     loss = _compute_loss_log(y, tX, w)  # Compute log-loss for final iteration
     w = w.reshape(-1)  # Convert weights back to 1D array
     return w, loss
 
-def lasso_SD(y, tX, initial_w, max_iters=1000, gamma=0.1, lambda_ = 0.1, threshold=None):
+def lasso_SD(y, tX, initial_w=None, max_iters=1000, gamma=0.1, lambda_=0.1, threshold=None):
     """
     Lasso Subgradient Descent regressor with MSE loss function.
 
     Parameters
     ----------
-    y : np.ndarray
+    y : np.ndarray (N,)
         Vector with the labels.
-    tX : np.ndarray
+    tX : np.ndarray (N,) or (N, D)
         Array with the samples as rows and the features as columns.
-    initial_w : np.ndarray or None, default=None
+    initial_w : np.ndarray (D,) or None, default=None
         Vector with initial weights to start the iteration from.
     max_iters : int, default=1000
         Maximum number of iterations.
@@ -567,18 +561,18 @@ def lasso_SD(y, tX, initial_w, max_iters=1000, gamma=0.1, lambda_ = 0.1, thresho
     lambda_ : float, defalut=0.1
         Regularization parameter.
     threshold: float, default=None
-        Threshold under which the weight entries are set to zero in order to have sparsity.
+        Threshold under which the weight entries are set to zero.
         
     Returns
     -------
-    w : np.ndarray
+    w : np.ndarray (D,)
         Vector containing the final weights.
     loss : float
         Mean square error loss function evaluated with the final weights.
 
     References
     ----------
-    [1] M. Jaggi, and M. E. Khan, "Optimization", Machine Learning (CS-433),
+    [8] M. Jaggi, and M. E. Khan, "Optimization", Machine Learning (CS-433),
         pp. 6-7, September 23, 2021.
 
     Usage
@@ -591,38 +585,17 @@ def lasso_SD(y, tX, initial_w, max_iters=1000, gamma=0.1, lambda_ = 0.1, thresho
     [0.09219308 0.08941125 0.08259039 0.10009369 0.11471479 0.10400056
     0.11830658 0.05418399 0.06966045 0.10933284] 0.043595101687066144
     """
-    # Number of samples
-    N = len(y)
 
-    # Converting 1D arrays to 2D arrays
-    w = initial_w.reshape((len(initial_w), 1))
-    y = y.reshape((N, 1))
-
-    # Checking if 'tX' is a 1D array, and consequently converting to a 2D array
-    if len(tX.shape) == 1:
-
-        tX = tX.reshape((N, 1))
+    y, tX, w = _preprocess_arrays(y, tX, initial_w)
 
     for iter in range(max_iters):
 
-        # Error vector
-        e = y - np.dot(tX, w)
+        penalty = 2*len(y) * lambda_ / np.sqrt(1 + iter) * np.sign(w)  # Penalty
+        w = w - gamma * (_compute_grad_mse(y, tX, w) + penalty)  # Update [7]
 
-        # Subgradient for the Lasso loss function
-        subgrad = - np.dot(tX.T, e) / N + lambda_ / np.sqrt(1 + iter) * np.sign(w)
-
-        # Updating weights with negative gradient scaled by 'gamma'
-        w = w - gamma * subgrad
-
-
-    # Computing loss (MSE) for the weights in the final iteration
-    loss = np.mean(e**2) / 2
-
-    # Converting weights back to 1D arrays
-    w = w.reshape(len(w))
-
-    # Setting to zero all the entries of w under the threshold in absolute value
-    if (threshold != None):
+    loss = _compute_loss_mse(y, tX, w)  # Compute MSE-loss for final iteration
+    w = w.reshape(-1)  # Converting weights back to 1D arrays
+    if threshold is not None:  # Set entries smaller than threshold to zero
         w[np.absolute(w) < threshold] = 0
 
     return w, loss
