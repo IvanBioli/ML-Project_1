@@ -5,6 +5,7 @@ Run
 Run this file in order to obtain the predictions for each of our regressors.
 The parameters are specified in 'params', and the predictions are stored in a
 .csv file in directory 'data/submission_[NAME OF THE REGRESSOR]'.
+
 Minimum working example
 -----------------------
 >>> from proj1_helpers import *
@@ -32,8 +33,8 @@ _, tX_test, ids_test = load_csv_data('data/test.csv')
 # Determine the ratio of samples with label -1 to the total samples
 pred_ratio = sum(y_train == -1) / len(y_train)
 
-tX_train_median = substitute_outliers(tX_train, 'median')
-tX_test_median = substitute_outliers(tX_test, 'median')
+tX_train_median = substitute_999(tX_train, tX_train, 'median')
+tX_test_median = substitute_999(tX_train, tX_test, 'median')
 
 configs = [{'regressor' : 'least_squares_GD',
             'degrees' : [1, 2, 3],
@@ -65,15 +66,22 @@ configs = [{'regressor' : 'least_squares_GD',
             
             {'regressor' : 'logistic_regression',
             'degrees' : [0, 1, 2, 3],
-            'params' : {'gamma': 0.001},
-            'pred_ratio' : False,
+            'params' : {'gamma': 1e-6, 'max_iters': 500},
+            'pred_ratio' : pred_ratio,
             'tX_train' : tX_train_median,
             'tX_test' : tX_test_median},
 
            {'regressor' : 'reg_logistic_regression',
             'degrees' : [0, 1],
-            'params' : {'lambda_': 0.0001},
-            'pred_ratio' : False,
+            'params' : {'gamma': 1e-6, 'lambda_': 0.0001, 'max_iters': 500},
+            'pred_ratio' : pred_ratio,
+            'tX_train' : tX_train_median,
+            'tX_test' : tX_test_median},
+            
+            {'regressor' : 'lasso_SD',
+            'degrees' : [0, 1, 2, 3],
+            'params' : {'gamma': 1e-4, 'lambda_': 0.0001, 'max_iters': 500},
+            'pred_ratio' : pred_ratio,
             'tX_train' : tX_train_median,
             'tX_test' : tX_test_median}]
 
