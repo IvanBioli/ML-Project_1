@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#%% -*- coding: utf-8 -*-
 """
 Run
 ***
@@ -46,24 +46,24 @@ configs = [{'regressor' : 'least_squares_GD',
             'pred_ratio' : pred_ratio,
             'tX_train' : tX_train_subs_outliers,
             'tX_test' : tX_test_subs_outliers},
-            
+
            {'regressor' : 'ridge_regression',
             'degrees' : [1, 2, 3, 4, 5, 6, 7],
             'params' : {'lambda_': 1e-8},
             'pred_ratio' : pred_ratio,
             'tX_train' : tX_train_subs_outliers,
             'tX_test' : tX_test_subs_outliers},
-            
+
             {'regressor' : 'logistic_regression',
-            'degrees' : [0, 1, 2, 3],
-            'params' : {'gamma': 1e-6, 'max_iters': 500},
+            'degrees' : [0, 1, 2, 3, 4],
+            'params' : {'gamma': 2e-6, 'max_iters': 500},
             'pred_ratio' : False,
             'tX_train' : tX_train_subs_outliers,
             'tX_test' : tX_test_subs_outliers},
 
            {'regressor' : 'reg_logistic_regression',
-            'degrees' : [0, 1],
-            'params' : {'gamma': 1e-6, 'lambda_': 0.0001, 'max_iters': 500},
+            'degrees' : [0, 1, 2, 3, 4],
+            'params' : {'lambda_': 1e-4, 'gamma': 2.5e-6, 'max_iters': 500},
             'pred_ratio' : False,
             'tX_train' : tX_train_subs_outliers,
             'tX_test' : tX_test_subs_outliers}]
@@ -78,3 +78,5 @@ for config in configs:
     weights, _ = eval(config['regressor'])(y_train, tX_train_poly, **config['params'])
     y_pred = predict_labels(weights, tX_test_poly, config['pred_ratio'])
     create_csv_submission(ids_test, y_pred, 'data/submission_' + config['regressor'] + '.csv')
+
+# %%
