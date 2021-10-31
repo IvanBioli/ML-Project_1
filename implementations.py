@@ -185,7 +185,7 @@ def substitute_outliers(tX_base, tX_modify, substitute='mean', level=3):
 
     return tX_substituted
 
-def categorical_to_bynary(tX, col = -1):
+def categorical_to_binary(tX, col=-1):
     '''
     TODO:
     '''
@@ -221,8 +221,8 @@ def higgs_preprocessing(tX_train, tX_valid, degree, categorical = False):
     if categorical:
         tX_train = np.hstack((tX_train, PRI_jet_num_train))
         tX_valid = np.hstack((tX_valid, PRI_jet_num_valid))
-        tX_train = categorical_to_bynary(tX_train)
-        tX_valid = categorical_to_bynary(tX_valid)
+        tX_train = categorical_to_binary(tX_train)
+        tX_valid = categorical_to_binary(tX_valid)
     
     return tX_train, tX_valid
 
@@ -355,7 +355,7 @@ def least_squares_GD(y, tX, initial_w=None, max_iters=100, gamma=0.1):
     w = w.reshape(-1)  # Convert weights back to 1D array
     return w, loss
 
-def least_squares_SGD(y, tX, initial_w=None, max_iters=100000, gamma=0.1, seed=None):
+def least_squares_SGD(y, tX, initial_w=None, max_iters=1e+5, gamma=0.1, seed=None):
     """
     Stochastic gradient descent algorithm for mean square error (MSE) loss.
 
@@ -367,7 +367,7 @@ def least_squares_SGD(y, tX, initial_w=None, max_iters=100000, gamma=0.1, seed=N
         Array with the samples as rows and the features as columns.
     initial_w : np.ndarray (D,) or None, default=None
         Vector with initial weights to start the iteration from.
-    max_iters : int, default=100000
+    max_iters : int, default=1e+5
         Maximum number of iterations.
     gamma : float, default=0.1
         Scaling factor for the gradient subtraction.
@@ -637,60 +637,92 @@ def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, g
     w = w.reshape(-1)  # Convert weights back to 1D array
     return w, loss
 
-def lasso_SD(y, tX, initial_w=None, max_iters=1000, gamma=0.1, lambda_=0.1, threshold=None):
+def split_PRI_jet(tX, y):
     """
-    Lasso Subgradient Descent regressor with MSE loss function.
-
-    Parameters
-    ----------
-    y : np.ndarray (N,)
-        Vector with the labels.
-    tX : np.ndarray (N,) or (N, D)
-        Array with the samples as rows and the features as columns.
-    initial_w : np.ndarray (D,) or None, default=None
-        Vector with initial weights to start the iteration from.
-    max_iters : int, default=1000
-        Maximum number of iterations.
-    gamma : float, default=0.1
-        Scaling factor for the subgradient subtraction.
-    lambda_ : float, defalut=0.1
-        Regularization parameter.
-    threshold: float, default=None
-        Threshold under which the weight entries are set to zero.
-        
-    Returns
-    -------
-    w : np.ndarray (D,)
-        Vector containing the final weights.
-    loss : float
-        Mean square error loss function evaluated with the final weights.
-
-    References
-    ----------
-    [8] M. Jaggi, and M. E. Khan, "Optimization", Machine Learning (CS-433),
-        pp. 6-7, September 23, 2021.
-
-    Usage
-    -----
-    >>> tX = np.random.rand(1000, 10)
-    >>> y = np.random.rand(1000, 1)
-    >>> initial_w = np.ones(tX.shape[1] , dtype=float)
-    >>> w, loss = lasso_SD(y, tX, initial_w)
-    >>> print(w, loss)
-    [0.09219308 0.08941125 0.08259039 0.10009369 0.11471479 0.10400056
-    0.11830658 0.05418399 0.06966045 0.10933284] 0.043595101687066144
+    Description
     """
+    PRI_jet_num = tX[:,22]
 
-    y, tX, w = _preprocess_arrays(y, tX, initial_w)
+    # Split the data according to PRI_jet_num
+    tX0 = tX[PRI_jet_num == 0, :]
+    y0 = y[PRI_jet_num == 0]
+    tX1 = tX[PRI_jet_num == 1, :]
+    y1 = y[PRI_jet_num == 1]
+    tX2 = tX[PRI_jet_num == 2, :]
+    y2 = y[PRI_jet_num == 2]
+    tX3 = tX[PRI_jet_num == 3, :]
+    y3 = y[PRI_jet_num == 3]
+    return tX0, y0, tX1, y1, tX2, y2, tX3, y3
 
-    for iter in range(max_iters):
+# Description
+def remove_const_cols(tX):
+    return np.delete(tX, np.argwhere(np.std(tX, axis=0) == 0), axis=1)
 
-        penalty = 2*len(y) * lambda_ / np.sqrt(1 + iter) * np.sign(w)  # Penalty
-        w = w - gamma * (_compute_grad_mse(y, tX, w) + penalty)  # Update [7]
+def optimized_regression(base_regressor, tX, y, data, degree, param, pred_ratio=False):
+    """
+    Description
+    """
+    
+    # Split the data according to PRI_jet_num
+    tX0, y0, tX1, y1, tX2, y2, tX3, y3 = split_PRI_jet(tX, y)
 
-    loss = _compute_loss_mse(y, tX, w)  # Compute MSE-loss for final iteration
-    w = w.reshape(-1)  # Converting weights back to 1D arrays
-    if threshold is not None:  # Set entries smaller than threshold to zero
-        w[np.absolute(w) < threshold] = 0
+    # Remove the columns of all constant features in tXi
+    tX0 = remove_const_cols(tX0)
+    tX1 = remove_const_cols(tX1)
+    tX2 = remove_const_cols(tX2)
+    tX3 = remove_const_cols(tX3)
 
-    return w, loss
+    y_pred = np.zeros(data.shape[0])
+    PRI_jet = data[:, 22]
+
+    # Split the data according to PRI_jet_num
+    data0_ind = (PRI_jet == 0)
+    data0 = data[data0_ind, :]
+    
+    data1_ind = (PRI_jet == 1)
+    data1 = data[data1_ind, :]
+
+    data2_ind = (PRI_jet == 2)
+    data2 = data[data2_ind, :]
+    
+    data3_ind = (PRI_jet == 3)
+    data3 = data[data3_ind, :]
+    
+    # Remove the columns of all constant features from datai
+    data0 = remove_const_cols(data0)
+    data1 = remove_const_cols(data1)
+    data2 = remove_const_cols(data2)
+    data3 = remove_const_cols(data3)
+
+    # Do preprocessing (outlier removal and standardization)
+    tX0, data0 = higgs_preprocessing(tX0, data0, degree)
+    tX1, data1 = higgs_preprocessing(tX1, data1, degree)
+    tX2, data2 = higgs_preprocessing(tX2, data2, degree)
+    tX3, data3 = higgs_preprocessing(tX3, data3, degree)
+
+    # Train 4 separate models
+    print('Training model 0')
+    w0, _ = eval(base_regressor)(y0, tX0, **param)
+    print('Training model 1')
+    w1, _ = eval(base_regressor)(y1, tX1, **param)
+    print('Training model 2')
+    w2, _ = eval(base_regressor)(y2, tX2, **param)
+    print('Training model 3')
+    w3, _ = eval(base_regressor)(y3, tX3, **param)
+
+    # Building the prediction for all labels
+    y_pred[data0_ind] = np.dot(data0, w0)
+    y_pred[data1_ind] = np.dot(data1, w1)
+    y_pred[data2_ind] = np.dot(data2, w2)
+    y_pred[data3_ind] = np.dot(data3, w3)
+
+    # adjust threshold value to obtain a given prediction ratio
+    if not pred_ratio:
+        threshold = 0
+    else:
+        threshold = np.quantile(y_pred, pred_ratio)
+
+    y_pred[np.where(y_pred <= threshold)] = -1
+    y_pred[np.where(y_pred > threshold)] = 1
+    
+    return y_pred
