@@ -42,7 +42,7 @@ def create_csv_submission(ids, y_pred, name):
                name (string name of .csv output file to be created)
     """
     # added newline='' to avoid empty rows in .csv
-    with open(name, 'w', newline='') as csvfile:
+    with open(name, 'w') as csvfile:
         fieldnames = ['Id', 'Prediction']
         writer = csv.DictWriter(csvfile, delimiter=",", fieldnames=fieldnames)
         writer.writeheader()
