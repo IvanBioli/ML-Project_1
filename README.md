@@ -35,27 +35,28 @@ To get a minimal working example of the regressors, perform the following steps:
 
 
 ## 🔁 Reproduce results
-To reproduce the results we show in Table 2 of our report, follow the instructions 1. and 2. in [⛏️ Quick start](#️-quick-start) and then execute the run.py script with the following command: `python run.py`. The predictions for each of the regressor configurations will then be stored in the directory `data/submission_[NAME OF THE REGRESSOR]`.
+To reproduce the results we show in Table 2 of our report, follow the instructions 1. and 2. in [⛏️ Quick start](#️-quick-start) and then execute the run.py script with the following command: `python run.py`. The predictions for the best, and upon uncommenting some lines of code for all of the regressor configurations will then be stored in the directory `data/submission_[NAME OF THE REGRESSOR]`.
 
 
 ## 📂 File structure
 
 ```
 ML_project1 
-│   README.md               (The file you are reading right now)
-│   proj1_helpers.py        (Support functions that are provided by the lecturers)
-|   project1.ipynb          (Central notebook where one can execute the whole pipeline (preprocessing, regressors, scores) and see visualizations of the data set)
-│   implementations.py      (Contains all the implemented regressors)
-│   run.py                  (To be executed to get the results) 
+│   README.md                   (The file you are reading right now)
+│   proj1_helpers.py            (Support functions that are provided by the lecturers)
+|   project1.ipynb              (Central notebook where one can execute the whole pipeline (preprocessing, regressors, scores) and see visualizations of the data set)
+│   implementations.py          (Contains all the implemented regressors)
+│   run.py                      (To be executed to get the results) 
 │
 └───data.zip
 │   │   test.csv	        (Test data)
-│   │   train.csv           (Training data)
+│   │   train.csv               (Training data)
+│   │   final_submission_[].csv (The final submission .csv we submitted to AIcrowd for each of the regressors)
 │   
 └───report
-    │   main.tex            (Main typesetting file)
-    │   style.sty           (Stylesheet)
-    |   biblio.bib          (Bibliography file)
+    │   main.tex                (Main typesetting file)
+    │   style.sty               (Stylesheet)
+    |   biblio.bib              (Bibliography file)
 ```
 
 ## 📚 References
