@@ -185,6 +185,48 @@ def substitute_outliers(tX_base, tX_modify, substitute='mean', level=3):
 
     return tX_substituted
 
+def categorical_to_bynary(tX, col = -1):
+    '''
+    TODO:
+    '''
+    ref = tX[:,col].reshape(-1,1)
+    tX = np.delete(tX, col, axis = 1)
+    values = np.unique(ref)
+    for val in values:
+        np.hstack((tX,(ref == val)))    
+    
+    return tX
+
+
+def higgs_preprocessing(tX_train, tX_valid, degree, categorical = False):
+    '''
+    TODO:
+    '''
+    if categorical:
+        PRI_jet_num_train = tX_train[:,22].reshape(-1,1)
+        PRI_jet_num_valid = tX_valid[:,22].reshape(-1,1)
+
+        tX_train = np.delete(tX_train, 22, axis = 1)
+        tX_valid = np.delete(tX_valid, 22, axis = 1)
+
+    tX_valid = substitute_999(tX_train, tX_valid, "median")
+    tX_train = substitute_999(tX_train, tX_train, "median")
+
+    tX_valid = substitute_outliers(tX_train, tX_valid, "mean", 3)    
+    tX_train = substitute_outliers(tX_train, tX_train, "mean", 3)
+
+    tX_valid = polynomial_basis(tX_train, degree, True, tX_valid)
+    tX_train = polynomial_basis(tX_train, degree, True, tX_train)
+    
+    if categorical:
+        tX_train = np.hstack((tX_train, PRI_jet_num_train))
+        tX_valid = np.hstack((tX_valid, PRI_jet_num_valid))
+        tX_train = categorical_to_bynary(tX_train)
+        tX_valid = categorical_to_bynary(tX_valid)
+    
+    return tX_train, tX_valid
+
+
 def _preprocess_arrays(y, tX, initial_w=None):
     """
     Convert potential 1D arrays or scalars to 2D arrays to maximize
