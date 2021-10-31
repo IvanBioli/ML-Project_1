@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#%% -*- coding: utf-8 -*-
 """
 Run
 ***
@@ -28,7 +28,66 @@ tX_test_subs = substitute_999(tX_train, tX_test, 'median')
 tX_train_subs = substitute_999(tX_train, tX_train, 'median')
 tX_test_subs = substitute_outliers(tX_train_subs, tX_test_subs, 'mean', 3)
 tX_train_subs = substitute_outliers(tX_train_subs, tX_train_subs, 'mean', 3)
+#%%
+configs = [{'regressor' : 'least_squares_GD',
+            'degrees' : [1, 2, 3],
+            'params' : {'gamma': 9e-2, 'max_iters': 200},
+            'pred_ratio' : pred_ratio,
+            'tX_train' : tX_train_subs,
+            'tX_test' : tX_test_subs},
 
+            {'regressor' : 'least_squares_SGD',
+            'degrees' : [1, 2, 3, 4],
+            'params' : {'gamma': 3e-4, 'max_iters': 10000, 'seed': 0},
+            'pred_ratio' : pred_ratio,
+            'tX_train' : tX_train_subs,
+            'tX_test' : tX_test_subs},
+
+           {'regressor' : 'least_squares',
+            'degrees' : [1, 2, 3, 4],
+            'params' : {},
+            'pred_ratio' : pred_ratio,
+            'tX_train' : tX_train_subs,
+            'tX_test' : tX_test_subs},
+
+           {'regressor' : 'ridge_regression',
+            'degrees' : [0, 1, 2, 3, 4, 5, 6, 7, 8],
+            'params' : {'lambda_': 1e-11},
+            'pred_ratio' : False,
+            'tX_train' : tX_train_subs,
+            'tX_test' : tX_test_subs},
+
+            {'regressor' : 'logistic_regression',
+            'degrees' : [0, 1, 2, 3, 4],
+            'params' : {'gamma': 2e-6, 'max_iters': 500},
+            'pred_ratio' : False,
+            'tX_train' : tX_train_subs,
+            'tX_test' : tX_test_subs},
+
+           {'regressor' : 'reg_logistic_regression',
+            'degrees' : [0, 1, 2, 3, 4],
+            'params' : {'lambda_': 1e-4, 'gamma': 2.5e-6, 'max_iters': 500},
+            'pred_ratio' : False,
+            'tX_train' : tX_train_subs,
+            'tX_test' : tX_test_subs},
+
+            {'regressor' : 'optimized_regression',
+            'base_regressor' : 'ridge_regression',
+            'degrees' : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+            'params' : {'lambda_': 1e-13},
+            'pred_ratio' : False,
+            'tX_train' : tX_train,
+            'tX_test' : tX_test},
+            
+            {'regressor' : 'optimized_regression',
+            'base_regressor' : 'logistic_regression',
+            'degrees' : [0, 1, 2, 3, 4, 5],
+            'params' : {'gamma': 1e-5, 'max_iters':500},
+            'pred_ratio' : False,
+            'tX_train' : tX_train,
+            'tX_test' : tX_test}]
+#%%
+"""
 configs = [{'regressor' : 'least_squares_GD',
             'degrees' : [1, 2, 3],
             'params' : {'gamma': 9e-2, 'max_iters': 200},
@@ -78,7 +137,7 @@ configs = [{'regressor' : 'least_squares_GD',
             'pred_ratio' : pred_ratio,
             'tX_train' : tX_train,
             'tX_test' : tX_test}]
-
+"""
 for config in configs:
 
     # Raise the sets to a polynomial basis (and standardize them simultaneously)
@@ -97,3 +156,5 @@ for config in configs:
         create_csv_submission(ids_test, y_pred, 'data/submission_' + config['regressor'] + '.csv')
         y_pred_final = np.genfromtxt('data/final_submission_' + config['regressor'] + '.csv', delimiter=",", skip_header=1, dtype=int, usecols=1)
         print(config['regressor'], 'found', sum(y_pred != y_pred_final), 'different predictions.')
+
+# %%
