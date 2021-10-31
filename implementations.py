@@ -719,11 +719,11 @@ def optimized_regression(base_regressor, tX, y, data, degrees, param, pred_ratio
                           'logistic_regression', 'reg_logistic_regression'}
         The base-regressor to be used for solving the subproblems.
     tX : np.ndarray (N,) or (N, D)
-        Array with the samples as rows and the features as columns.
+        Training array with the samples as rows and the features as columns.
     y : np.ndarray (N,) in {-1, 1} or {0, 1}
         Vector with the labels.
     data : np.ndarray (M,) or (M, D)
-        Array with the samples as rows and the features as columns.
+        Testing array with the samples as rows and the features as columns.
     degrees : list or int
         List (or int) with the polynomial degrees (or maximum polynomial degree)
         that should be used as basis elements.
