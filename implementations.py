@@ -460,7 +460,7 @@ def ridge_regression(y, tX, lambda_=0.1):
     >>> y = 3*tX
     >>> w, loss = ridge_regression(y, tX)
     >>> w, loss
-    (array([2.92207792]), 0.02276943835385406)
+    (array([2.92207792]), 0.8766233766233765)
     """
 
     y, tX, _ = _preprocess_arrays(y, tX, None)  #  Convert from 1D to 2D arrays
@@ -469,7 +469,7 @@ def ridge_regression(y, tX, lambda_=0.1):
     penalty = lambda_ * 2*len(y) * np.identity(tX.shape[1])  # Penalty-term
     w = np.linalg.solve(np.dot(tX.T, tX) + penalty, np.dot(tX.T, y))
 
-    loss = _compute_loss_mse(y, tX, w)  # Compute MSE loss
+    loss = _compute_loss_mse(y, tX, w) + lambda_ * np.linalg.norm(w)**2 # Compute MSE loss and add penalty term
     w = w.reshape(-1)  # Convert weights back to 1D array
     return w, loss
 
@@ -581,7 +581,7 @@ def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, g
     >>> y = np.array([0, 0, 1, 1])
     >>> w, loss = reg_logistic_regression(y, tX)
     >>> w, loss
-    (array([0.25440098]), 2.499192702989407)
+    (array([0.25440098]), 2.505664688917194)
     """
 
     y[y <= 0] = 0  # If labels are in {-1, 1}, convert them to {0, 1}
@@ -592,7 +592,7 @@ def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, g
         penalty = 2*len(y) * lambda_ * w  # Penalty-term
         w = w - gamma * (_compute_grad_log(y, tX, w) + penalty)  # Update [7]
 
-    loss = _compute_loss_log(y, tX, w)  # Compute log-loss for final iteration
+    loss = _compute_loss_log(y, tX, w) + lambda_ * np.linalg.norm(w)**2 # Compute log-loss for final iteration and add penalty term
     w = w.reshape(-1)  # Convert weights back to 1D array
     return w, loss
 
