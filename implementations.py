@@ -581,7 +581,7 @@ def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, g
     >>> y = np.array([0, 0, 1, 1])
     >>> w, loss = reg_logistic_regression(y, tX)
     >>> w, loss
-    (array([0.25440098]), 2.505664688917194)
+    (array([0.25440098]), 2.525080646700554)
     """
 
     y[y <= 0] = 0  # If labels are in {-1, 1}, convert them to {0, 1}
@@ -592,7 +592,7 @@ def reg_logistic_regression(y, tX, lambda_=0.1, initial_w=None, max_iters=100, g
         penalty = 2*len(y) * lambda_ * w  # Penalty-term
         w = w - gamma * (_compute_grad_log(y, tX, w) + penalty)  # Update [7]
 
-    loss = _compute_loss_log(y, tX, w) + lambda_ * np.linalg.norm(w)**2 # Compute log-loss for final iteration and add penalty term
+    loss = _compute_loss_log(y, tX, w) + lambda_ * len(y) * np.linalg.norm(w)**2 # Compute log-loss for final iteration and add penalty term
     w = w.reshape(-1)  # Convert weights back to 1D array
     return w, loss
 
