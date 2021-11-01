@@ -30,8 +30,6 @@ config = {'regressor' : 'optimized_regression',
 
 y_pred = optimized_regression(config['base_regressor'], config['tX_train'], y_train, config['tX_test'], config['degrees'], config['params'])
 create_csv_submission(ids_test, y_pred, 'data/submission_' + config['regressor'] + '_' + config['base_regressor'] + '.csv')
-y_pred_submission = np.genfromtxt('data/final_submission_' + config['regressor'] + '_' + config['base_regressor'] + '.csv', delimiter=",", skip_header=1, dtype=int, usecols=1)
-print(config['regressor'], 'with', config['base_regressor'], 'found', sum(y_pred != y_pred_submission), 'different predictions from submissions.')
 
 """
 # Uncomment to reproduce all results stated in Table 2 of the report
@@ -112,6 +110,4 @@ for config in configs:
         # Do predictions, create submission-csv and compare to final submissions
         y_pred = optimized_regression(config['base_regressor'], config['tX_train'], y_train, config['tX_test'], config['degrees'], config['params'])
         create_csv_submission(ids_test, y_pred, 'data/submission_' + config['regressor'] + '_' + config['base_regressor'] + '.csv')
-        y_pred_submission = np.genfromtxt('data/final_submission_' + config['regressor'] + '_' + config['base_regressor'] + '.csv', delimiter=",", skip_header=1, dtype=int, usecols=1)
-        print(config['regressor'], 'with', config['base_regressor'], 'found', sum(y_pred != y_pred_submission), 'different predictions from submissions.')
 """
