@@ -51,7 +51,6 @@ ML_project1
 └───data.zip
 │   │   test.csv	        (Test data)
 │   │   train.csv               (Training data)
-│   │   final_submission_[].csv (The final submission .csv we submitted to AIcrowd for each of the regressors)
 │   
 └───report
     │   main.tex                (Main typesetting file)
@@ -60,9 +59,20 @@ ML_project1
 ```
 
 ## 📚 References
-[1] Adam-Bourdariosa C., Cowanb G., Germain C.,I. Guyond B. Kégl, Rousseau D.Learning to discover: [The Higgs boson machine learning challenge](https://higgsml.lal.in2p3.fr/files/2014/04/documentation_v1.8.pdf). 2014. 
 
-[2] Jaggi M., Urbanke R., Khan M. E.Machine Learning (CS-433): [Lecture notes](https://github.com/epfml/ML_course). 2021.
+[1] C. Adam-Bourdariosa et al. [Learning to discover: The Higgs boson machine learning challenge](https://higgsml.lal.in2p3.fr/files/2014/04/documentation_v1.8.pdf). 2014.
+
+[2] J. Brownlee. [Discover Feature Engineering, How to Engineer Features and How to Get Good at It](https://machinelearningmastery.com/discover-feature-engineering-how-to-engineer-features-and-how-to-get-good-at-it). 2015.
+
+[3] P. Domingos.  [A Few Useful Things to Knowabout Machine Learning](https://doi.org/10.1145/2347736.2347755). In: Commun. ACM55.10 (Oct. 2012), pp. 78–87. ISSN: 0001-0782.
+
+[4] F. E. Grubbs. “Procedures for detecting outlyingobservations in samples”.  In: Technometrics 11 (1969), pp. 1–21.
+
+[5] T. Hastie, R. Tibshirani, and J. Friedman. [The elements of statistical learning:  data mining, in-ference and prediction](http://www.stat-stanford.edu/~tibs/ElemStatLearn/). 2nd ed. Springer, 2009.
+
+[6] M. Jaggi, R. Urbanke, and M. E. Khan. Machine Learning (CS-433): [Lecture notes](https://github.com/epfml/ML_course). 2021.
+
+[7] The Free Encyclopedia Wikipedia. [Exploratorydata analysis](https://en.wikipedia.org/wiki/Exploratory_data_analysis). 2021.
 
 ## ✍️ Authors
 - Fabio Matti
