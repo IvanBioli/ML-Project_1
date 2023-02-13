@@ -35,8 +35,8 @@
 
 
 %%% REFERENCING
-\usepackage[numbers]{natbib}
-\bibliographystyle{rusnat}
+\usepackage[sorting=nyt, style=numeric, backend=biber]{biblatex}
+\addbibresource{bibliography.bib}
 
 % Links
 \usepackage{url}
@@ -64,3 +64,9 @@
 %%% MATHEMATICS
 \usepackage{amsmath}
 \usepackage{amssymb}
+
+%%% OTHER PACKAGES
+\usepackage{comment}
+\usepackage[font=footnotesize,labelfont=bf]{caption}
+\usepackage{subcaption}
+\usepackage{cleveref}

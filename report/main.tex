@@ -2,6 +2,7 @@
 
 \usepackage{style} 
 
+
 % Information for generating title
 \title{\bfseries Machine Learning: Project 1}
 \author{\textbf{Olivier Stähli} \\ \href{mailto:olivier.staehli@epfl.ch}{olivier.staehli@epfl.ch}
@@ -16,13 +17,9 @@
   \begin{@twocolumnfalse}
     \vspace{-1.5cm}
     \maketitle
+    \vspace{-1cm}
     \begin{abstract}
-        We implement six standard versions and one optimized version of a linear
-        regressor. Subsequently, the Higgs boson data set for binary classification
-        from 30 numerical features is used for testing our implementations. We
-        perform various preprocessing techniques and tune the parameters of our
-        regressors to maximize in first priority the F1-score and in second
-        priority the accuracy of the predictions.
+        We implement six standard regressors. Subsequently, the Higgs boson data set for binary classification from 30 numerical features is used for testing our implementations. We perform various preprocessing techniques and tune the parameters of our regressors to maximize accuracy, as first priority, and F1-score of the predictions, as second priority. Additionally, an optimized regressor for this specific task is developed.
     \end{abstract}
     \vspace{0.75cm}
   \end{@twocolumnfalse}
@@ -31,143 +28,133 @@
 \section{Introduction}
 \label{sec:introduction}
 
-The features in the data set record numerical measurements that coincide with the observation of either a decay signature that was caused by an event involving a Higgs boson ('s' for signal) or one that is not related to Higgs boson like decays ('b' for background) \cite{higgs2014}. Based on 250'000 samples of training data, our goal is to predict the unknown labels for the test data.
+The features in the data set refer to numerical measurements coinciding with the observation of a decay signature, either caused by an event involving a Higgs boson ('s' for signal) or  not related to Higgs bosons ('b' for background) \cite{higgs2014}. Based on 250'000 training samples, our goal is to predict the unknown labels for the test data.
 
 \section{Models and Methods}
 \label{sec:models}
 
 \subsection{Preprocessing}
 \label{subsec:preprocessing}
-In preprocessing, we visualized and analyzed the data in a first step. We made modifications to the features that have many undefined values (Figure \ref{fig:undefined_values_per_feature}), which were set to -999.
-We implemented the -999 values to be set to zero, mean or median. Further, we added to the features with undefined values another feature which binary indicates if the feature is defined or not. We then split the dataset according to the values of 
-After that, we standardized our data set. As a final preprocessing step, we transform our data into polynomial features.
+In a first step, we visualized and analyzed the data. We modified the features that showed undefined values, which were set by default to -999 \cite{higgs2014}. We tried replacing these undefined values with zero, the mean value or the median value of the feature (computed ignoring the undefined values). Among these approaches, the latter proved to be the most effective solution. We also tried adding a binary variable indicating that the corresponding entry of the feature was undefined, which did not prove to be effective.
 
+Subsequently, we replaced outliers, i.e. values that deviate  from the mean value more than three times the standard deviation according to the Grubbs' definition \cite{Grubbs69}, by the mean value of the feature. 
 
+The feature  \enquote{PRI\_jet\_num}  is a discrete variable. Therefore, for the standard regressors, we tried adding a binary feature for each number of jets. However, this approach did not lead to any improvement in accuracy.  Our optimized regressor exploits the \enquote{PRI\_jet\_num} feature to train a model for each number of jets. For a more detailed description of our approach, see \Cref{subsubsec:optimized regressor}.
+
+As a final preprocessing step, we augmented the features using a polynomial basis of degree $D$ with or without offset, and standardized the features by subtracting the mean value and dividing by the standard deviation.
+
+The improvements to which our preprocessing leads are shown in \Cref{fig:preprocessing}.
 \begin{figure}[htp]
     \centering
-    \includegraphics[width=\columnwidth]{figures/undefined_values.pdf}
-    \caption{This figure displays which feature has undefined values.}
-    \label{fig:undefined_values_per_feature}
+    \includegraphics[width=\columnwidth]{figures/preprocessing.pdf}
+    \caption{On the right, the effect every preprocessing step has on the distribution of the values (here for the first feature). On the left, the progression of the mean accuracy in a 4-fold cross validation on the training set with regularized logistic regression.}
+    \label{fig:preprocessing}
 \end{figure}
 
+\vspace{-8pt}
 \subsection{Implementations}
 \label{subsec:implementations}
 
 We implemented the six proposed regressors in Python, based on their description
 in \cite{jaggi2021}. Our implementations solely rely on the NumPy 1.21.1 library.
-The source code is available on our Git repository\footnote{\url{https://github.com/FMatti/ML_project1}}.
+The source code is available on our \href{https://github.com/CS-433/ml-project-1-thelearningwolves.git}{Git repository}.
 
 We paid particular attention to the following aspects:
-
 \begin{itemize}
-    \item Robustness: We implement the regressors in such a way that they can
-          be passed any NumPy ndarray object as data matrix by diligent reshaping
-          of arrays. Furthermore, we included \enquote{exp-guards} that prevent exponential 
-          functions from overflowing.
-    \item Simple minimum working example: Each of our regressors may be fitted by 
-          just passing the training data without any other parameters to the function.
-    \item Thorough documentation: Every regressor's parameters and a simple usage
-          example are described in a comment block below the function definition.
+    \vspace{-8pt}
+    \item Robustness: We implemented the regressors so that they can process any NumPy ndarray object as data matrix by diligent reshaping of arrays. Furthermore, we included \enquote{exp-guards} that prevent exponential functions from overflowing.
+    \vspace{-8pt}
+    \item Simple minimal working example: Each of our regressors may be fitted by just processing the training data without any other parameters.
 \end{itemize}
 
-Since the logistic regression demonstrated in \cite{jaggi2021} only works for
-$y_n \in \{0, 1\}$, we derived an equivalent formalism for the given labels
-$\hat{y}_n \in \{-1, 1\}$. The derivation is found in 'addendum.pdf'
-on our Git repository. The
-resulting gradient of the loss function is
-\begin{equation}
-    \boldsymbol{\nabla} \mathcal{L}(\boldsymbol{w})
-     = - \boldsymbol{X}^T \left[ \boldsymbol{y} \odot \frac{1}
-        {1 + \exp{(\hat{\boldsymbol{y}} \odot (\boldsymbol{X} \boldsymbol{w}))}} \right]
-\end{equation}
-Here, $\odot$ denotes element-wise multiplication.
-
-{\color{red}TODO}: Finally, we create an optimized regressor based on the following principles:
-
-\begin{itemize}
-    \item Lasso subgradient descent.
-    \item ...
-    \item Adjustment of label skewness: Since the training labels exhibit a skewness
-          of approximately 65 to 35 \% of one category to the other, we adjust the
-          classification threshold (set to zero by default) in such a way, that our
-          predicted labels have the same ratio as the training labels. Otherwise,
-          if for instance our prediction ratio was 50-50, and supposing the testing
-          labels are of the same nature as the training labels are, we would at best
-          be able to achieve an accuracy of 85 \% from the beginning.
-\end{itemize}
+\vspace{-8pt}
+\subsubsection{Optimized regressor}
+\label{subsubsec:optimized regressor}
+The detailed description of the features in the dataset documentation \cite{higgs2014}, highlights that some features are systematically undefined for some values of the \enquote{PRI\_jet\_num} feature. For our optimized regressor, we therefore split our training set according to the four different jet numbers and trained four separate models. After splitting, the following operations were separately performed  on each of the reduced training sets. Constant columns in the reduced sets, like \enquote{PRI\_jet\_num} and those with only undefined values, were removed. The preprocessing was then carried out in the same way as described in \Cref{subsec:preprocessing}. To train the four separate models, we used as a base regressor one of the regressors proposed in the project description. Finally, we generated predictions for each number of jets separately.
 
 \subsection{Parameter tuning}
 \label{subsec:tuning}
 
-{\color{red}TODO}: Explain parameter tuning (crossvalidation, grid search for ideal parameters).
+We tuned our regressors through a 4-fold cross validation on the training set. Since we were dealing with a classification problem, instead of using a loss function, we used the accuracy as an indicator of how good our predictions are. The achieved accuracy is visualized through a grid-plot (see \Cref{fig:paramter_grid_search}). This type of visualization allows us extracting suitable parameters for our regressors. It also serves as an indicator of how stable the parameters are. If next to our ideal parameter, the accuracy falls off immediately, we avoid choosing this one, because of the uncertainty of whether this parameter will fail on the test set or not.
 
 \begin{figure}[htp]
     \centering
-    \includegraphics[width=\columnwidth]{figures/log_reg_gridsearch.pdf}
-    \caption{{\color{red}TODO}: Parameter grid search 4-fold cross validation, reg logistic regression, lambda and gamma for fixed degree and max iters.}
+    \begin{subfigure}[b]{0.49\columnwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/ridge_regression_gridsearch_coarse.pdf}
+         \caption{Coarse grid search.}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.49\columnwidth}
+         \centering
+         \includegraphics[width=\textwidth]{figures/ridge_regression_gridsearch_finer.pdf}
+         \caption{Finer grid search.}
+     \end{subfigure}
+    \caption{Visualization used for tuning the parameters. Here, the ridge regressor was used in a 4-fold cross-validation. The accuracy is plotted on a grid for various choices of the regularization parameter $\lambda$ and the degree of the polynomial basis. Once a coarse grid search is done, a finer grid search is performed to find the parameters.}
     \label{fig:paramter_grid_search}
 \end{figure}
 
-The set of parameters that worked best for each regressor can be found in Table \ref{tab:params} below.
+The best set of parameters for each regressor can be found in Table \ref{tab:params}.
 
 \begin{table}[ht]
-    \caption{{\color{red}TODO}: Ideal parameters for the regressors found by means of grid-search
-             and 4-fold cross-validation with the training set. $\lambda$ is 
-             the regularization parameter, $N$ the maximum number of iterations,
-             and $\gamma$ the learning rate. If used, the initial parameter vector
-             $\boldsymbol{w}_0$ was always set to zero.}
+    \caption{Ideal parameters for the regressors found by means of grid-search and 4-fold cross-validation. $D$ is the degree of the polynomial basis, $\lambda$ is the regularization parameter, $N$ is the maximum number of iterations, and $\gamma$ is the learning rate. If used, the initial parameter vector $\boldsymbol{w}_0$ was always set to zero.}
     \label{tab:params}
+    \small
     \centering
-    \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{@{}lccc@{}}
+    \renewcommand{\arraystretch}{1.1}
+    \begin{tabular}{@{}lcccc@{}}
         \toprule
-        Regressor & $\lambda$ & $N$ & $\gamma$ \\
+        Regressor & $D$ & $\lambda$ & $N$ & $\gamma$ \\
         \midrule
-        least\_squares\_GD & - & 100 & 0.1 \\
-        least\_squares\_SGD & - & 100 & 0.1 \\
-        least\_squares & - & - & -  \\
-        ridge\_regression & 0.1 & - & - \\
-        logistic\_regression & - & 100 & 0.1 \\
-        reg\_logistic\_regression & 0.1 & 100 & 0.1 \\
-        lasso\_SD & 0.1 & 100 & 0.1 \\
+        least\_squares\_GD & 4 & - & 200 & 0.07 \\
+        least\_squares\_SGD & 4 & - & 1e+5 & 5e-4 \\
+        least\_squares & 8 & - & - & -  \\
+        ridge\_regression & 8 & 1e-11 & - & - \\
+        logistic\_regression & 4 & - & 500 & 2e-6 \\
+        reg\_logistic\_regression & 4 & 1e-4 & 500 & 2.5e-6 \\
+        optimized\_ridge & 9 & 1e-13 & - & - \\
+        optimized\_logistic & 5 & - & 500 & 1e-5 \\
+        optimized\_reg\_logistic & 8 & 1e-9 & 500 & 6.3e-6 \\
         \bottomrule
     \end{tabular}
 \end{table}
 
 \section{Results}
 \label{sec:results}
-The F1-score and accuracy our regressors were able to achieve can be seen below in Table
-\ref{tab:results}.
+The F1-score and accuracy our regressors were able to achieve are provided in \Cref{tab:results}. For our optimized regressor, as a base regressor we use the best linear regressor, i.e. ridge regression, and both logistic regressors.
 
 % TODO: Links to submissions
 \begin{table}[ht]
-    \caption{Scores of the predictions we achieved with the regressors on 
+    \caption{Prediction performances achieved with the regressors on 
              the parameters specified in \ref{tab:params}. The regressor's
-             names are clickable links ({\color{red}TODO}) to the submission on AIcrowd.}
+             names are clickable links to the respective submission.}
     \label{tab:results}
     \centering
-    \renewcommand{\arraystretch}{1.2}
+    \small
+    \renewcommand{\arraystretch}{1.1}
     \begin{tabular}{@{}lcc@{}}
         \toprule
         Regressor & F1-score & Accuracy \\
         \midrule
-        \href{https://www.aicrowd.com/challenges/epfl-machine-learning-higgs/submissions/159686}{least\_squares\_GD} & 0.665 & 0.712 \\
-        \href{https://www.aicrowd.com/challenges/epfl-machine-learning-higgs/submissions/159686}{least\_squares\_SGD} & 0.665 & 0.712 \\
-        \href{https://www.aicrowd.com/challenges/epfl-machine-learning-higgs/submissions/159686}{least\_squares} & 0.665 & 0.712 \\
-        \href{https://www.aicrowd.com/challenges/epfl-machine-learning-higgs/submissions/159686}{ridge\_regression} & 0.665 & 0.712 \\
-        \href{https://www.aicrowd.com/challenges/epfl-machine-learning-higgs/submissions/159686}{logistic\_regression} & 0.665 & 0.712 \\
-        \href{https://www.aicrowd.com/challenges/epfl-machine-learning-higgs/submissions/159686}{reg\_logistic\_regression} & 0.665 & 0.712 \\
-        \href{https://www.aicrowd.com/challenges/epfl-machine-learning-higgs/submissions/159686}{optimized\_regressor} & 0.665 & 0.712 \\
+        \href{https://www.aicrowd.com/challenges/epfl-machine-learning-higgs/submissions/164066}{least\_squares\_GD} & 0.666 & 0.789 \\
+        \href{https://www.aicrowd.com/challenges/epfl-machine-learning-higgs/submissions/164068}{least\_squares\_SGD} & 0.626  & 0.773\\
+        \href{https://www.aicrowd.com/challenges/epfl-machine-learning-higgs/submissions/164069}{least\_squares} & 0.711 & 0.814 \\
+        \href{https://www.aicrowd.com/challenges/epfl-machine-learning-higgs/submissions/163533}{ridge\_regression} & 0.711 & 0.814 \\
+        \href{https://www.aicrowd.com/challenges/epfl-machine-learning-higgs/submissions/163297}{logistic\_regression} & 0.679 & 0.805 \\
+        \href{https://www.aicrowd.com/challenges/epfl-machine-learning-higgs/submissions/163299}{reg\_logistic\_regression} & 0.699 & 0.806 \\
+        \href{https://www.aicrowd.com/challenges/epfl-machine-learning-higgs/submissions/164216}{optimized\_ridge} & 0.731 & 0.826 \\
+        \href{https://www.aicrowd.com/challenges/epfl-machine-learning-higgs/submissions/163557}{optimized\_logistic} & 0.711 & 0.812\\
+        \href{https://www.aicrowd.com/challenges/epfl-machine-learning-higgs/submissions/163862}{optimized\_reg\_logistic} & 0.718 & 0.817 \\
         \bottomrule
     \end{tabular}
 \end{table}
 
 \section{Discussion}
 \label{sec:discussion}
-During implementation we learned that replacing -999 with zero, mean or median does not improve our results and that linear model is unsuited for this classification.
+Following the discussion in \cite{jaggi2021}, we expected linear models not to be particularly suitable to classification problems, such as the present one. However, among the proposed regressors, the ridge regressor reaches a higher accuracy with respect to the logistic and the regularized logistic regressors. This might be due to the fact that the dataset is not too unbalanced and we remove extreme values through preprocessing. Furthermore, our optimized regressor improved the accuracy and the F1-score by more than 1\% and, once again, the adoption of the ridge regressor as a base regressor leads to better results with respect to the use of logistic regressors. 
 
-{\color{red}TODO}: Shortcomings of our regressors.
-
-\bibliography{biblio.bib}
+\newpage
+\nocite{*}
+\printbibliography
 
 \end{document}
